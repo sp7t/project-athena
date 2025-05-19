@@ -3,7 +3,6 @@
   "editor.formatOnSave": true,
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.showEditor": false,
-  "conventionalCommits.promptScopes": false,
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
   }

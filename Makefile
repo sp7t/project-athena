@@ -1,6 +1,11 @@
 ENV ?= dev
 
-.PHONY: backend frontend backend-dev frontend-dev backend-prod frontend-prod dev prod
+.PHONY: backend frontend backend-dev frontend-dev backend-prod frontend-prod dev prod install
+
+install:
+	@echo "Installing dependencies and pre-commit hooks..."
+	uv sync
+	pre-commit install
 
 backend:
 ifeq ($(ENV),dev)
@@ -44,4 +49,17 @@ dev:
 
 prod:
 	$(MAKE) backend ENV=prod & $(MAKE) frontend ENV=prod
+
+lint:
+	@echo "Checking for linting issues..."
+	uv run ruff check .
+
+format:
+	@echo "Formatting code..."
+	uv run ruff format .
+
+fix:
+	@echo "Formatting code and fixing linting issues..."
+	uv run ruff format .
+	uv run ruff check . --fix
 
