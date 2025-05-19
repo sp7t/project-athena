@@ -12,7 +12,6 @@ Before you begin, ensure you have the following installed on your system:
 
 - **Make**: A build automation tool.
   - To check if it's installed, run: `make --version`
-  - If not installed, you can usually install it via your system's package manager (e.g., `brew install make` on macOS, `sudo apt-get install make` on Debian/Ubuntu).
 - **uv**: A fast Python package installer and resolver.
   - To check if it's installed, run: `uv --version`
   - If not installed, follow the [official uv installation guide](https://github.com/astral-sh/uv#installation).
@@ -99,7 +98,7 @@ As an intern, you'll often be responsible for identifying and creating issues fo
     - **Chore**: For routine maintenance tasks, refactoring, or other non-feature/bug work. (Uses `chore.md`)
     - **Setup**: For issues related to project setup or environment configuration. (Uses `setup.md`)
     - **Test**: For tasks related to writing or updating tests. (Uses `test.md`)
-4.  **Fill out the template fields** as thoroughly as possible. Provide clear titles, detailed descriptions, steps to reproduce (for bugs), acceptance criteria (for features), and any other relevant information.
+4.  **Fill out the template fields** as thoroughly as possible. Provide clear titles, detailed descriptions, steps to reproduce (for bugs), and any other relevant information.
 5.  **Assign yourself** or relevant team members if applicable.
 6.  **Add appropriate labels** (e.g., `bug`, `feature`, `documentation`, `backend`, `frontend`).
 
@@ -180,7 +179,8 @@ A commit message should be structured as follows:
   fix(frontend): correct typo on login button
 
   The button text was previously "Lgoin", corrected to "Login".
-  Closes #123
+
+  Refs: #123
   ```
 
   ```
