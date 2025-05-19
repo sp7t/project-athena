@@ -1,0 +1,56 @@
+[project]
+name = "project-athena"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+    "google-genai>=1.12.1",
+    "pydantic>=2.11.3",
+    "pydantic-settings>=2.9.1",
+    "pyperclip>=1.9.0",
+    "python-dotenv>=1.1.0",
+    "python-multipart>=0.0.20",
+    "requests>=2.32.3",
+    "streamlit>=1.44.1",
+    "supabase>=2.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.7",
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D100",     # undocumented-public-module
+    "D104",     # undocumented-public-package
+
+    # CONFLICTING LINTING & FORMAT RULES
+    "COM812",   # missing-trailing-comma
+    "COM819",   # prohibited-trailing-comma
+    "D206",     # indent-with-spaces
+    "D300",     # triple-single-quotes
+    "E111",     # indentation-with-invalid-multiple
+    "E114",     # indentation-with-invalid-multiple-comment
+    "E117",     # over-indented
+    "E501",     # line-too-long
+    "ISC001",   # single-line-implicit-string-concatenation
+    "ISC002",   # multi-line-implicit-string-concatenation
+    "Q000",     # bad-quotes-inline-string
+    "Q001",     # bad-quotes-multiline-string
+    "Q002",     # bad-quotes-docstring
+    "Q003",     # avoidable-escaped-quote
+    "W191",     # tab-indentation
+]
+
+[tool.ruff.lint.per-file-ignores]
+"frontend/*" = [
+    "N999",     # invalid-module-name
+]
+"frontend/pages/*" = [
+    "INP001",   # implicit-namespace-package
+]
