@@ -18,29 +18,18 @@ load_css()
 
 st.title("Job Description Generator")
 
-# Initialize session state variables
+# Initialize session state for copy success message
 if "copied" not in st.session_state:
     st.session_state.copied = False
-if "description" not in st.session_state:
-    st.session_state.description = ""
-if "edit_mode" not in st.session_state:
-    st.session_state.edit_mode = False
 
 
-# --- API Call Function ---
-def generate_job_description(
-    job_title: str, custom_note: str, key_focus: str, benefits: str = ""
-) -> str | None:
+# Function to call the backend API
+def generate_job_description(job_title: str, job_details: str) -> str | None:
     """Call the backend API to generate a job description."""
     try:
         response = requests.post(
             f"{API_URL}/job-descriptions/",
-            json={
-                "title": job_title,
-                "custom_note": custom_note,
-                "key_focus": key_focus,
-                "benefits": benefits,
-            },
+            json={"title": job_title, "details": job_details},
             headers={"Content-Type": "application/json"},
             timeout=30,
         )
@@ -54,91 +43,80 @@ def generate_job_description(
     return None
 
 
-# --- Input Form UI ---
+# Create the form for job description generation
 with st.form("job_description_form"):
     title_input = st.text_input(
         "Enter job title",
         placeholder="e.g., Senior Software Engineer, Product Manager, Data Scientist",
     )
-    custom_note_input = st.text_input(
-        "Enter custom note (e.g., US Citizens only)",
-        placeholder="e.g., US Citizens only, F1 accepted, Internship...",
-    )
-    key_focus_input = st.text_area(
-        "Enter key skills (comma-separated)",
-        placeholder="e.g., Python, SQL, Machine Learning, Communication...",
-        height=100,
-    )
-    benefits_input = st.text_area(
-        "Enter benefits (optional, one per line or comma-separated)",
-        placeholder="e.g., Remote Flexibility, Paid Time Off, 401(k)",
-        height=80,
+    details_input = st.text_area(
+        "Enter job details (optional)",
+        placeholder="e.g., Key responsibilities, required skills, company culture...",
+        height=150,
     )
 
     submit_button = st.form_submit_button(label="Generate")
 
-# --- Handle Form Submission ---
+# Handle form submission
 if submit_button:
-    if title_input and custom_note_input and key_focus_input:
+    if title_input:
+        # Show a spinner while generating
         with st.spinner("Generating job description..."):
-            benefits = "\n".join(
-                f"- {b.strip()}" for b in benefits_input.split(",") if b.strip()
-            )
-            generated = generate_job_description(
-                title_input,
-                custom_note_input,
-                key_focus_input,
-                benefits,
+            # Call API to generate job description
+            # Use a temporary variable for the newly generated description
+            newly_generated_description = generate_job_description(
+                title_input, details_input
             )
 
-            if generated:
-                st.session_state.description = generated
-                st.session_state.edit_mode = False
+            if newly_generated_description:
+                # Store the description in session state
+                st.session_state.description = newly_generated_description
             else:
-                st.session_state.pop("description", None)
+                # If generation fails, clear any existing description from session state
+                if "description" in st.session_state:
+                    del st.session_state.description
                 st.error("Failed to generate job description. Please try again later.")
     else:
-        st.session_state.pop("description", None)
-        st.warning("Please fill in job title, custom note, and key skills.")
+        # If title is missing, also clear any existing description
+        if "description" in st.session_state:
+            del st.session_state.description
+        st.warning("Please enter a job title first.")
 
-# --- Display Generated Description ---
-# --- Display Generated Description ---
-if st.session_state.get("description", ""):
+# Display generated job description if it exists in session state
+# This block is now outside and independent of the `if submit_button:` block for display persistence
+if "description" in st.session_state and st.session_state.description:
     st.divider()
     st.subheader("Generated Job Description")
 
+    # Create action buttons
     col1, col2 = st.columns(2)
 
-    # Copy Button
+    # Copy button
     with col1:
-        copy_button = st.button("Copy", key="copy_btn_persistent")
+        copy_button = st.button(
+            "Copy", key="copy_btn_persistent"
+        )  # Changed key to avoid conflict if old one lingers
         if copy_button:
-            copy_to_clipboard(st.session_state.description)
-        if st.session_state.get("copied", False):
+            copy_to_clipboard(
+                st.session_state.description
+            )  # Use description from session state
+
+        # Show success message if copied
+        if st.session_state.get("copied", False):  # Use .get for safer access
             st.toast("Copied to clipboard", icon="✅")
+            # Reset after showing
             st.session_state.copied = False
 
-    # Download Button
+    # Download button
     with col2:
         st.download_button(
             label="Download",
-            data=st.session_state.description,
+            data=st.session_state.description,  # Use description from session state
             file_name="job_description.md",
             mime="text/markdown",
-            key="download_btn_persistent",
+            key="download_btn_persistent",  # Changed key
         )
 
-    # Display in view or edit mode
-    if not st.session_state.edit_mode:
-        with st.container(border=True):
-            st.markdown(st.session_state.description)
-        if st.button("Edit"):
-            st.session_state.edit_mode = True
-    else:
-        st.session_state.description = st.text_area(
-            "Edit the job description below:",
-            value=st.session_state.description,
-            height=400,
-        )
-        if st.button("Save"):
-            st.session_state.edit_mode = False
+    # Display content in the styled container
+    with st.container(border=True):
+        st.markdown(st.session_state.description)  # Use description from session state

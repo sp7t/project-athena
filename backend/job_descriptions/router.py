@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=JobDescriptionResponse)  # noqa: FAST001
+@router.post("/")
 async def create_job_description(
     request: JobDescriptionRequest,
 ) -> JobDescriptionResponse:

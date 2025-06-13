@@ -4,7 +4,7 @@ from backend.core.schemas import LLMErrorResponse
 
 
 class JobDescriptionRequest(BaseModel):
-    """Input model for generating a job description."""
+    """Request model for generating a job description."""
 
     job_title: str = Field(
         description="The job title (e.g., Data Scientist, Product Manager).",
