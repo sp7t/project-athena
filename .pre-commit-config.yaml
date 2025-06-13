@@ -20,16 +20,16 @@ repos:
       - id: no-commit-to-branch
         args: [-b, main, -b, develop]
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.26.0
+    rev: v8.27.2
     hooks:
       - id: gitleaks
   - repo: https://github.com/crate-ci/typos
-    rev: v1.32.0
+    rev: v1
     hooks:
       - id: typos
         args: []
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10
+    rev: v0.11.13
     hooks:
       - id: ruff
         args: [--fix]
