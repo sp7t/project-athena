@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 
-from backend.job_descriptions.exceptions import JobDescriptionServiceError
+from backend.job_descriptions.exceptions import (
+    InvalidJobInputError,
+    JobDescriptionServiceError,
+)
 from backend.job_descriptions.schemas import (
     JobDescriptionRequest,
     JobDescriptionResponse,
@@ -13,15 +16,22 @@ router = APIRouter(
 )
 
 
-@router.post("/")
+@router.post("/", response_model=JobDescriptionResponse)  # noqa: FAST001
 async def create_job_description(
     request: JobDescriptionRequest,
 ) -> JobDescriptionResponse:
-    """Receives job title and details, generates a job description using an LLM."""
+    """Generate a job description using LLM based on title, note, key focus, and benefits."""
     try:
-        generated_description = await generate_job_description(
-            title=request.title, details=request.details
+        description = await generate_job_description(
+            job_title=request.title,
+            custom_note=request.custom_note,
+            key_focus=request.key_focus,
+            benefits=request.benefits or "",
         )
-        return JobDescriptionResponse(job_description=generated_description)
+        return JobDescriptionResponse(job_description=description)
+
+    except InvalidJobInputError:
+        raise  # Let FastAPI handle it as a 400
+
     except Exception as e:
         raise JobDescriptionServiceError(detail=str(e)) from e
