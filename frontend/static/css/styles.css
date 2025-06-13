@@ -1,16 +1,62 @@
-/* Button styles */
-div[data-testid="stColumn"] {
-  width: fit-content !important;
-  flex: unset;
-}
-div[data-testid="stColumn"] * {
-  width: fit-content !important;
+/* Corporate Blue Theme */
+:root {
+  --bg: #f4f7fa;
+  --card-bg: #ffffff;
+  --primary: #0052cc;
+  --primary-hover: #003d99;
+  --text: #1a1a1a;
+  --border: #e0e5ec;
 }
 
-/* Description box styles */
-.description-box {
-  background-color: #a9a9a9;
-  padding: 20px;
-  border-radius: 5px;
-  margin-bottom: 20px;
+body,
+.stApp {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: "Inter", sans-serif !important;
+}
+
+/* Cards & Forms */
+div[data-testid="stForm"],
+div[data-testid="metric-container"],
+div.description-box {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  margin-bottom: 20px !important;
+}
+
+/* Buttons */
+.stButton > button {
+  background-color: var(--primary) !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  transition: background 0.2s ease !important;
+}
+.stButton > button:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+/* Progress Bars */
+div[class*="stProgress"] div[role="progressbar"] {
+  background-color: var(--primary) !important;
+}
+
+/* Center Metrics */
+div[data-testid="metric-container"] {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Restore Normal Columns */
+div[data-testid="stColumn"] {
+  width: auto !important;
+  flex: 1 !important;
+}
+div[data-testid="stColumn"] * {
+  width: auto !important;
 }
