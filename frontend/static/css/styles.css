@@ -1,62 +1,64 @@
-/* Corporate Blue Theme */
-:root {
-  --bg: #f4f7fa;
-  --card-bg: #ffffff;
-  --primary: #0052cc;
-  --primary-hover: #003d99;
-  --text: #1a1a1a;
-  --border: #e0e5ec;
-}
-
+/* Global Styles */
 body,
 .stApp {
-  background-color: var(--bg) !important;
-  color: var(--text) !important;
-  font-family: "Inter", sans-serif !important;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #111827;
+  color: #f1f5f9;
 }
 
-/* Cards & Forms */
-div[data-testid="stForm"],
-div[data-testid="metric-container"],
-div.description-box {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  padding: 24px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-  margin-bottom: 20px !important;
+/* Upload Box Styling */
+.stFileUploader,
+.stTextArea,
+.stTextInput {
+  background-color: #1f2937;
+  border-radius: 14px;
+  padding: 14px;
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Buttons */
-.stButton > button {
-  background-color: var(--primary) !important;
-  color: white !important;
-  border-radius: 6px !important;
-  padding: 8px 16px !important;
-  font-weight: 600 !important;
-  transition: background 0.2s ease !important;
-}
-.stButton > button:hover {
-  background-color: var(--primary-hover) !important;
+button[kind="primary"] {
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 14px 36px !important;
+  font-weight: 600;
+  font-size: 16px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Progress Bars */
-div[class*="stProgress"] div[role="progressbar"] {
-  background-color: var(--primary) !important;
+button[kind="primary"]:hover {
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%) !important;
 }
 
-/* Center Metrics */
-div[data-testid="metric-container"] {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+/* Cards */
+.card {
+  background-color: #1f2937;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  margin-bottom: 30px;
 }
 
-/* Restore Normal Columns */
-div[data-testid="stColumn"] {
-  width: auto !important;
-  flex: 1 !important;
+/* Metrics */
+div[data-testid="stMetric"] {
+  margin-bottom: 30px;
 }
-div[data-testid="stColumn"] * {
-  width: auto !important;
+
+.score-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+/* Footer */
+.footer {
+  color: #aaa;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 60px;
 }
