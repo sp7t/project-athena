@@ -5,7 +5,7 @@ ENV ?= dev
 install:
 	@echo "Installing dependencies and pre-commit hooks..."
 	uv sync
-	pre-commit install
+	uv run pre-commit install
 
 backend:
 ifeq ($(ENV),dev)
