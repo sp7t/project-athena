@@ -1,5 +1,5 @@
-# --- resume_evaluation.py ---
 from pathlib import Path
+from typing import IO, Any
 
 import streamlit as st
 from PyPDF2 import PdfReader
@@ -7,39 +7,85 @@ from PyPDF2 import PdfReader
 from frontend.components.header import render_header
 from frontend.services.resume_service import analyze_resume
 
-# Page config
-st.set_page_config(page_title="🦉 Athena Resume Analyzer", layout="wide")
 
-# Apply global dark mode safety (extra guarantee)
-st.markdown(
-    """
-    <style>
-        html, body, .stApp {
-            background-color: #111827 !important;
-            color: #f1f5f9 !important;
+def load_css() -> None:
+    """Load custom CSS styles."""
+    css_path = Path(__file__).parents[1] / "static" / "css" / "styles.css"
+    if css_path.exists():
+        with css_path.open() as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    else:
+        st.error("CSS file not found.")
+
+
+def render_custom_textarea_label() -> None:
+    """Apply custom style to textarea label."""
+    st.markdown(
+        """
+        <style>
+        .stTextArea label {
+            color: #111827 !important;
+            font-weight: 600;
         }
-    </style>
-""",
-    unsafe_allow_html=True,
-)
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
-# Render header
+def extract_resume_text(pdf_file: IO[bytes]) -> str:
+    """Extract text from uploaded PDF file."""
+    pdf = PdfReader(pdf_file)
+    return "\n".join(page.extract_text() or "" for page in pdf.pages)
+
+
+def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) -> None:
+    """Render the individual score metrics section."""
+    st.markdown("### Individual Scores")
+    cols = st.columns(3)
+    for idx, (label, total) in enumerate(score_max.items()):
+        score = data.get(label, 0)
+        with cols[idx % 3]:
+            st.metric(label.replace("_", " ").title(), f"{score}/{total}")
+            st.progress(min(score / total, 1.0))
+
+
+def render_feedback_sections(data: dict[str, Any]) -> None:
+    """Render feedback sections: summary, detailed feedback, missing qualifications, suggestions."""
+    st.markdown("<h3>Summary Feedback</h3>", unsafe_allow_html=True)
+    st.info(data.get("summary_feedback", "No summary provided."))
+
+    st.markdown("<h3>Detailed Feedback</h3>", unsafe_allow_html=True)
+    for field, feedback in data.get("detailed_feedback", {}).items():
+        label = field.replace("_feedback", "").replace("_", " ").title()
+        st.write(f"**{label}:** {feedback}")
+
+    st.markdown("<h3>Missing Qualifications</h3>", unsafe_allow_html=True)
+    missing = data.get("missing_qualifications", [])
+    for item in missing:
+        st.write(f"- {item}")
+
+    st.markdown("<h3>Improvement Suggestions</h3>", unsafe_allow_html=True)
+    suggestions = data.get("improvement_suggestions", [])
+    for item in suggestions:
+        st.write(f"- {item}")
+
+
+# Set page config
+st.set_page_config(page_title="Athena Resume Analyzer", layout="wide")
+
+# Load CSS & custom label styling
+load_css()
+render_custom_textarea_label()
+
+# Render Header
 render_header()
-
-# Load CSS
-css_path = Path(__file__).parents[1] / "static" / "css" / "styles.css"
-if css_path.exists():
-    with css_path.open() as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-else:
-    st.error(f"CSS file not found at {css_path}")
 
 # Upload Form
 with st.form("upload_form"):
     st.subheader("Upload Resume & Paste Job Description")
     resume_file = st.file_uploader("Upload Resume (PDF Only)", type=["pdf"])
-    job_description = st.text_area("Paste Job Description Here", height=180)
+    job_description = st.text_area("Paste Job Description Here", height=200)
     submit = st.form_submit_button("Analyze Resume")
 
 if submit:
@@ -47,9 +93,7 @@ if submit:
         st.warning("Please upload both resume and job description.")
         st.stop()
 
-    pdf = PdfReader(resume_file)
-    resume_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-
+    resume_text = extract_resume_text(resume_file)
     data = analyze_resume(resume_text, job_description)
 
     score_max = {
@@ -64,44 +108,13 @@ if submit:
     ats_score = sum(data.get(label, 0) for label in score_max)
 
     st.markdown(
-        f"<h2 class='score-title'>Resume Evaluation Score: {ats_score}/100</h2>",
-        unsafe_allow_html=True,
+        f"<h2>Resume Evaluation Score: {ats_score}/100</h2>", unsafe_allow_html=True
     )
 
-    st.markdown("### Individual Scores")
-    cols = st.columns(3)
-    for idx, (label, total) in enumerate(score_max.items()):
-        score = data.get(label, 0)
-        with cols[idx % 3]:
-            st.metric(label.replace("_", " ").title(), f"{score}/{total}")
-            st.progress(min(score / total, 1.0))
+    render_individual_scores(data, score_max)
+    render_feedback_sections(data)
 
-    st.markdown("<div class='card'><h3>Summary Feedback</h3>", unsafe_allow_html=True)
-    st.info(data.get("summary_feedback", "No summary provided."))
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div class='card'><h3>Detailed Feedback</h3>", unsafe_allow_html=True)
-    for field, feedback in data.get("detailed_feedback", {}).items():
-        label = field.replace("_feedback", "").replace("_", " ").title()
-        st.write(f"**{label}:** {feedback}")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown(
-        "<div class='card'><h3>Missing Qualifications</h3>", unsafe_allow_html=True
-    )
-    missing = data.get("missing_qualifications", [])
-    for item in missing:
-        st.write(f"- {item}")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown(
-        "<div class='card'><h3>Improvement Suggestions</h3>", unsafe_allow_html=True
-    )
-    suggestions = data.get("improvement_suggestions", [])
-    for item in suggestions:
-        st.write(f"- {item}")
-    st.markdown("</div>", unsafe_allow_html=True)
-
+# Footer
 st.markdown(
     "<div class='footer'>© 2025 Athena Resume Analyzer | Powered by 7T.ai</div>",
     unsafe_allow_html=True,

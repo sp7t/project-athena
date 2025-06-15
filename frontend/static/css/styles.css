@@ -1,64 +1,147 @@
-/* Global Styles */
+/* === Global Fonts and Colors === */
 body,
 .stApp {
-  font-family: "Segoe UI", sans-serif;
-  background-color: #111827;
-  color: #f1f5f9;
+  background-color: #f9fafb;
+  color: #111827;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  transition: all 0.3s ease-in-out;
 }
 
-/* Upload Box Styling */
-.stFileUploader,
-.stTextArea,
-.stTextInput {
-  background-color: #1f2937;
-  border-radius: 14px;
-  padding: 14px;
-  color: #f9fafb;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* === Upload Form Card === */
+.st-emotion-cache-1avcm0n {
+  background-color: #ffffff !important;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  color: #111827 !important;
+  border: 1px solid #e5e7eb;
+}
+
+/* Subheaders */
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* File Uploader */
+.stFileUploader {
+  background-color: #000000 !important;
+  border-radius: 12px;
+  padding: 20px;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb;
+}
+
+/* Fix FileUploader Label (Upload Resume etc.) */
+div[data-testid="stFileUploaderLabel"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+/* Labels */
+label {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+/* TextArea */
+textarea {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
 }
 
 /* Buttons */
-button[kind="primary"] {
-  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%) !important;
+button {
+  background-color: #444444 !important;
   color: #ffffff !important;
-  border-radius: 12px !important;
-  padding: 14px 36px !important;
+  border-radius: 8px !important;
+  padding: 12px 25px !important;
   font-weight: 600;
-  font-size: 16px !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: none;
+  transition: 0.3s;
 }
 
-button[kind="primary"]:hover {
-  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%) !important;
+button:hover {
+  background-color: #ff006a !important;
 }
 
-/* Cards */
-.card {
-  background-color: #1f2937;
-  padding: 32px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  margin-bottom: 30px;
+/* Error / Warning Alert Boxes */
+div[role="alert"][data-baseweb="notification"][class*="error"] {
+  color: #b91c1c !important;
+  background-color: #fef2f2 !important;
+  border: 1px solid #fca5a5 !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  font-weight: 500 !important;
 }
 
-/* Metrics */
-div[data-testid="stMetric"] {
-  margin-bottom: 30px;
-}
-
-.score-title {
-  font-size: 34px;
-  font-weight: 700;
-  color: #60a5fa;
-  margin-top: 30px;
-  margin-bottom: 30px;
+/* Summary Feedback box */
+div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
+  background-color: #eff6ff !important;
+  color: #111827 !important;
+  border: 1px solid #93c5fd !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  font-weight: 500 !important;
 }
 
 /* Footer */
 .footer {
-  color: #aaa;
-  font-size: 13px;
+  margin-top: 50px;
   text-align: center;
-  margin-top: 60px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* === Metric Section Styling === */
+div[data-testid="stMetricLabel"] {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+}
+div[data-testid="stMetricValue"] {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  font-size: 35px !important;
+}
+div[data-testid="stProgress"] > div > div {
+  background-color: #2563eb !important;
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 24px;
+  }
+  div[data-testid="stMetricValue"] {
+    font-size: 26px !important;
+  }
+  div[data-testid="stMetricLabel"] {
+    font-size: 14px !important;
+  }
+}
+
+/* === MOST IMPORTANT FINAL FIX === */
+/* Force file uploader label text */
+div[data-testid="stFileUploaderLabel"],
+.stFileUploader label {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+/* Force uploaded filename text */
+.stFileUploader div div div span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
 }
