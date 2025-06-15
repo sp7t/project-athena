@@ -8,7 +8,7 @@ from frontend.components.header import render_header
 from frontend.services.resume_service import analyze_resume
 
 # Page config
-st.set_page_config(page_title="🧚 Athena Resume Analyzer", layout="centered")
+st.set_page_config(page_title="🦉 Athena Resume Analyzer", layout="wide")
 
 # Apply global dark mode safety (extra guarantee)
 st.markdown(
