@@ -1,4 +1,4 @@
-/* === Global Fonts and Colors === */
+/* === GLOBAL FONTS & COLORS === */
 body,
 .stApp {
   background-color: #f9fafb;
@@ -7,7 +7,7 @@ body,
   transition: all 0.3s ease-in-out;
 }
 
-/* === Upload Form Card === */
+/* === UPLOAD FORM CARD === */
 .st-emotion-cache-1avcm0n {
   background-color: #ffffff !important;
   border-radius: 16px;
@@ -17,7 +17,7 @@ body,
   border: 1px solid #e5e7eb;
 }
 
-/* === Subheaders === */
+/* === HEADERS === */
 h2,
 h3,
 h4,
@@ -28,7 +28,7 @@ h6 {
   margin-bottom: 20px;
 }
 
-/* === File Uploader Box === */
+/* === FILE UPLOADER === */
 .stFileUploader {
   background-color: #000000 !important;
   border-radius: 12px;
@@ -37,7 +37,6 @@ h6 {
   border: 1px solid #e5e7eb;
 }
 
-/* File Uploader Label (e.g. Upload Resume (PDF Only)) */
 div[data-testid="stFileUploaderLabel"],
 .stFileUploader label {
   color: #ffffff !important;
@@ -46,13 +45,12 @@ div[data-testid="stFileUploaderLabel"],
   opacity: 1 !important;
 }
 
-/* Uploaded File Name (e.g. Shashank RE.pdf) */
 .stFileUploader div div div span {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-/* === TextArea === */
+/* === TEXT AREA === */
 textarea {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -61,7 +59,7 @@ textarea {
   border: 1px solid #e5e7eb;
 }
 
-/* === Buttons === */
+/* === BUTTONS === */
 button {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -75,7 +73,7 @@ button:hover {
   background-color: #ff006a !important;
 }
 
-/* === Error / Warning Alerts === */
+/* === ALERTS === */
 div[role="alert"][data-baseweb="notification"][class*="error"] {
   color: #b91c1c !important;
   background-color: #fef2f2 !important;
@@ -85,7 +83,6 @@ div[role="alert"][data-baseweb="notification"][class*="error"] {
   font-weight: 500 !important;
 }
 
-/* === Summary Feedback Alert === */
 div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   background-color: #eff6ff !important;
   color: #111827 !important;
@@ -95,7 +92,7 @@ div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   font-weight: 500 !important;
 }
 
-/* === Footer === */
+/* === FOOTER === */
 .footer {
   margin-top: 50px;
   text-align: center;
@@ -103,22 +100,19 @@ div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   color: #6b7280;
 }
 
-/* === Metrics === */
-div[data-testid="stMetricLabel"] {
-  color: #111827 !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
-}
+/* === METRICS — VALUE === */
 div[data-testid="stMetricValue"] {
   color: #111827 !important;
   font-weight: 700 !important;
   font-size: 35px !important;
 }
+
+/* === METRICS — PROGRESS BAR === */
 div[data-testid="stProgress"] > div > div {
   background-color: #2563eb !important;
 }
 
-/* === Responsive Tweaks === */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   h2 {
     font-size: 24px;
@@ -126,12 +120,9 @@ div[data-testid="stProgress"] > div > div {
   div[data-testid="stMetricValue"] {
     font-size: 26px !important;
   }
-  div[data-testid="stMetricLabel"] {
-    font-size: 14px !important;
-  }
 }
 
-/* === Header Styling (already applied before) === */
+/* === HEADER === */
 header[data-testid="stHeader"] {
   background-color: #0f172a !important;
   height: 80px !important;
@@ -141,13 +132,18 @@ header[data-testid="stHeader"] {
   border-bottom: 1px solid #e5e7eb !important;
   box-shadow: none !important;
 }
-
-/* Align buttons better vertically inside header */
 header[data-testid="stHeader"] button {
   margin-top: 10px !important;
 }
 
-/* === Push body content down to avoid overlapping === */
+/* === BODY CONTENT PUSH === */
 div.block-container {
-  padding-top: 100px !important; /* match header height + safe margin */
+  padding-top: 100px !important;
+}
+
+/* === SETTINGS MODAL CLOSE BUTTON FIX === */
+div[data-testid="stOverlayHeader"] svg {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 1 !important;
 }

@@ -5,6 +5,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 
 from frontend.components.header import render_header
+from frontend.components.scorecard import render_scorecard_html
 from frontend.services.resume_service import analyze_resume
 
 
@@ -40,14 +41,15 @@ def extract_resume_text(pdf_file: IO[bytes]) -> str:
 
 
 def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) -> None:
-    """Render the individual score metrics section."""
+    """Render the individual scorecards using components.html inside columns."""
     st.markdown("### Individual Scores")
+
     cols = st.columns(3)
+
     for idx, (label, total) in enumerate(score_max.items()):
         score = data.get(label, 0)
         with cols[idx % 3]:
-            st.metric(label.replace("_", " ").title(), f"{score}/{total}")
-            st.progress(min(score / total, 1.0))
+            render_scorecard_html(label.replace("_", " ").title(), score, total)
 
 
 def render_feedback_sections(data: dict[str, Any]) -> None:
