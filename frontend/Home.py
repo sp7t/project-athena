@@ -7,7 +7,7 @@ from frontend import STATIC_PATH
 
 st.set_page_config(page_title="Athena HR Toolkit", page_icon="🦉", layout="centered")
 
-# Inject custom CSS styling
+# Inject custom CSS styling (same as your original)
 st.markdown(
     """
     <style>
@@ -38,23 +38,26 @@ st.markdown(
     .button-container {
         display: flex;
         gap: 50px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .button {
-        background-color: #1D6ED8;
-        color: white !important;
-        padding: 20px 60px;
-        border-radius: 12px;
-        text-decoration: none !important;
-        font-size: 18px;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-    }
+    background-color: #2F7EDB;
+    color: white !important;
+    padding: 20px 60px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
 
-    .button:hover {
-        background-color: #155DB3;
-    }
+.button:hover {
+    background-color: #2566B8;
+}
+
 
     .top-right-logo {
         position: fixed;
@@ -101,6 +104,9 @@ st.markdown(
         <div class="button-container">
             <a class="button" href="/Resume_Evaluation" target="_self">Resume Evaluation</a>
             <a class="button" href="/Job_Description" target="_self">Job Description Generator</a>
+            <a class="button" href="/Candidate_Comparison" target="_self">Candidate Comparison</a>
+            <a class="button" href="/Email_Generator" target="_self">Email Generator</a>
+            <a class="button" href="/Interview_Questions" target="_self">Interview Questions Generator</a>
         </div>
     </div>
     """,

@@ -17,7 +17,7 @@ body,
   border: 1px solid #e5e7eb;
 }
 
-/* Subheaders */
+/* === Subheaders === */
 h2,
 h3,
 h4,
@@ -28,30 +28,31 @@ h6 {
   margin-bottom: 20px;
 }
 
-/* File Uploader */
+/* === File Uploader Box === */
 .stFileUploader {
   background-color: #000000 !important;
   border-radius: 12px;
   padding: 20px;
-  color: #111827 !important;
+  color: #ffffff !important;
   border: 1px solid #e5e7eb;
 }
 
-/* Fix FileUploader Label (Upload Resume etc.) */
-div[data-testid="stFileUploaderLabel"] {
+/* File Uploader Label (e.g. Upload Resume (PDF Only)) */
+div[data-testid="stFileUploaderLabel"],
+.stFileUploader label {
   color: #ffffff !important;
   font-weight: 600 !important;
   font-size: 14px !important;
+  opacity: 1 !important;
 }
 
-/* Labels */
-label {
-  color: #111827 !important;
+/* Uploaded File Name (e.g. Shashank RE.pdf) */
+.stFileUploader div div div span {
+  color: #ffffff !important;
   font-weight: 600 !important;
-  font-size: 14px !important;
 }
 
-/* TextArea */
+/* === TextArea === */
 textarea {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -60,9 +61,9 @@ textarea {
   border: 1px solid #e5e7eb;
 }
 
-/* Buttons */
+/* === Buttons === */
 button {
-  background-color: #444444 !important;
+  background-color: #000000 !important;
   color: #ffffff !important;
   border-radius: 8px !important;
   padding: 12px 25px !important;
@@ -70,12 +71,11 @@ button {
   border: none;
   transition: 0.3s;
 }
-
 button:hover {
   background-color: #ff006a !important;
 }
 
-/* Error / Warning Alert Boxes */
+/* === Error / Warning Alerts === */
 div[role="alert"][data-baseweb="notification"][class*="error"] {
   color: #b91c1c !important;
   background-color: #fef2f2 !important;
@@ -85,7 +85,7 @@ div[role="alert"][data-baseweb="notification"][class*="error"] {
   font-weight: 500 !important;
 }
 
-/* Summary Feedback box */
+/* === Summary Feedback Alert === */
 div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   background-color: #eff6ff !important;
   color: #111827 !important;
@@ -95,7 +95,7 @@ div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   font-weight: 500 !important;
 }
 
-/* Footer */
+/* === Footer === */
 .footer {
   margin-top: 50px;
   text-align: center;
@@ -103,7 +103,7 @@ div[role="alert"][data-baseweb="notification"]:not([class*="error"]) {
   color: #6b7280;
 }
 
-/* === Metric Section Styling === */
+/* === Metrics === */
 div[data-testid="stMetricLabel"] {
   color: #111827 !important;
   font-weight: 600 !important;
@@ -118,7 +118,7 @@ div[data-testid="stProgress"] > div > div {
   background-color: #2563eb !important;
 }
 
-/* === Responsive Adjustments === */
+/* === Responsive Tweaks === */
 @media (max-width: 768px) {
   h2 {
     font-size: 24px;
@@ -131,17 +131,23 @@ div[data-testid="stProgress"] > div > div {
   }
 }
 
-/* === MOST IMPORTANT FINAL FIX === */
-/* Force file uploader label text */
-div[data-testid="stFileUploaderLabel"],
-.stFileUploader label {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
+/* === Header Styling (already applied before) === */
+header[data-testid="stHeader"] {
+  background-color: #0f172a !important;
+  height: 80px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  z-index: 999 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
 }
 
-/* Force uploaded filename text */
-.stFileUploader div div div span {
-  color: #ffffff !important;
-  font-weight: 600 !important;
+/* Align buttons better vertically inside header */
+header[data-testid="stHeader"] button {
+  margin-top: 10px !important;
+}
+
+/* === Push body content down to avoid overlapping === */
+div.block-container {
+  padding-top: 100px !important; /* match header height + safe margin */
 }
