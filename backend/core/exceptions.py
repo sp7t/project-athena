@@ -1,9 +1,11 @@
-class StructuredOutputError(Exception):
-    """Raised when Gemini response cannot be parsed into the requested schema."""
+# backend/core/exceptions.py
 
-    def __init__(self, schema_name: str, raw_response: str) -> None:
-        self.schema_name = schema_name
-        self.raw_response = raw_response
-        super().__init__(
-            f"Failed to parse Gemini response into {schema_name} [Raw Response: {raw_response[:500]}...]"
-        )
+from fastapi import HTTPException
+
+
+class LLMGenerationError(HTTPException):
+    """Custom exception for errors during LLM text generation."""
+
+    def __init__(self, detail: str, status_code: int = 500) -> None:
+        """Initialize the LLM generation error."""
+        super().__init__(status_code=status_code, detail=detail)
