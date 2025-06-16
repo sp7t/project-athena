@@ -237,7 +237,7 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 
 ### Example Workflow Summary
 
-1.  Intern picks up issue `#101` (e.g., a backend bug).
+1.  Developer picks up issue `#101` (e.g., a backend bug).
 2.  Ensures `develop` is up to date: `git checkout develop && git pull origin develop`.
 3.  Creates a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
 4.  Makes changes, commits them using Conventional Commits.
@@ -245,8 +245,70 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 6.  Pushes branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
 7.  Opens a PR against `develop`.
 8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
-9.  After review and approval, the PR is merged by your supervisor.
+9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
+
+### Recommended Workflow for Full-Stack Features
+
+When working on features that involve both backend and frontend changes, follow this sequence to ensure smooth development:
+
+**Why Backend First?**
+Since our frontend depends on the backend APIs, it's essential to have the backend functionality working before implementing the UI. This approach ensures that:
+
+- Frontend developers have working APIs to integrate with
+- Functionality is prioritized over appearance (which is the right approach)
+- Integration issues are caught early
+- Testing can be done incrementally
+
+**Step-by-Step Process:**
+
+1. **Backend Development:**
+
+   ```bash
+   # Create backend branch
+   git checkout -b feat/backend-#123-user-authentication develop
+
+   # Implement backend functionality
+   # - Add API endpoints
+   # - Implement business logic
+   # - Add tests
+   # - Update documentation
+
+   # Submit backend PR
+   git push origin feat/backend-#123-user-authentication
+   # Open PR against develop, get it reviewed and merged
+   ```
+
+2. **Frontend Development (after backend is merged):**
+
+   ```bash
+   # Update your develop branch
+   git checkout develop
+   git pull origin develop
+
+   # Create frontend branch
+   git checkout -b feat/frontend-#123-user-authentication develop
+
+   # Implement frontend functionality
+   # - Create UI components
+   # - Integrate with backend APIs
+   # - Add user interactions
+   # - Test the complete flow
+
+   # Submit frontend PR
+   git push origin feat/frontend-#123-user-authentication
+   # Open PR against develop
+   ```
+
+**Important Notes:**
+
+- Use separate branches for backend and frontend work, even if they're for the same feature
+- Both PRs should reference the same issue number (e.g., `#123`)
+- Only the final frontend PR should include `Closes #123` to auto-close the issue
+- The backend PR can use `Refs #123` to link without closing
+- Test the complete end-to-end functionality before marking the feature as complete
+
+This workflow ensures that each component is properly reviewed and tested before moving to the next layer of the application.
 
 ## 🎨 Coding Standards
 
