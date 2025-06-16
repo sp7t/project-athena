@@ -338,10 +338,10 @@ backend/
 │ ├── __init__.py       # Standard Python package marker.
 │ ├── router.py         # Defines API endpoints (FastAPI routers) for this module. Handles HTTP requests and responses.
 │ ├── service.py        # Contains the core business logic for the module. Orchestrates operations, calling repositories and other services.
-│ ├── repository.py     # Handles data access and persistence. Interacts directly with the database.
 │ ├── schemas.py        # Pydantic models used for API request/response validation, serialization, and as Data Transfer Objects (DTOs) between layers.
-│ ├── models.py         # (If using an ORM or distinct domain models) Defines the structure of your data, often corresponding to database tables or rich domain objects.
 │ ├── exceptions.py     # Custom exception classes specific to this module, helping to handle errors gracefully.
+│ ├── utils.py          # Helper functions and utilities specific to this module. Contains reusable code that doesn't fit elsewhere.
+│ └── constants.py      # Module-specific constants, enums, and configuration values that don't change during runtime.
 ```
 
 This structure promotes separation of concerns and makes it easier to navigate and maintain the codebase as it grows. When creating new features or modules, try to follow this pattern.
