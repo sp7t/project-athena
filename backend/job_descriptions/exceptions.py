@@ -1,13 +1,14 @@
-from fastapi import HTTPException
+from fastapi import status
+
+from backend.exceptions import APIException
 
 
-class JobDescriptionServiceError(HTTPException):
-    """Custom exception for errors during job description service operations."""
+class InvalidJobRequirementsError(APIException):
+    """Exception for invalid job requirements."""
 
-    def __init__(
-        self,
-        detail: str = "An internal error occurred in the job description service.",
-        status_code: int = 500,
-    ) -> None:
-        """Initialize JobDescriptionServiceError."""
-        super().__init__(status_code=status_code, detail=detail)
+    def __init__(self, detail: str) -> None:
+        """Initialize InvalidJobRequirementsError."""
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid job requirements: {detail}",
+        )

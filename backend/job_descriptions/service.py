@@ -1,5 +1,5 @@
-from backend.core.llm import generate_text
-from backend.job_descriptions.prompts import JOB_DESCRIPTION_PROMPT
+from backend.core.gemini import generate_text
+from backend.job_descriptions.constants import JOB_DESCRIPTION_PROMPT
 
 
 async def generate_job_description(title: str, details: str | None) -> str:
