@@ -2,16 +2,19 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
+from backend.candidate_comparison_tool.router import (
+    router as candidate_comparison_router,
+)
 from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
 
-# Add routers to the main API router
 router = APIRouter()
 router.include_router(job_descriptions_router)
+router.include_router(candidate_comparison_router)
 
 app = FastAPI(
     title="Project Athena",
-    description="API endpoints for job description generation and resume evaluations.",
+    description="API endpoints for job description generation, resume evaluations, and candidate comparisons.",
 )
 
 
