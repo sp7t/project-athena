@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from backend.core.llm import generate_text
@@ -7,14 +6,14 @@ from .exceptions import ResumeEvaluationError
 from .prompts import RESUME_EVAL_PROMPT
 
 
-def evaluate_resume(resume_text: str, job_description: str) -> dict:
+async def evaluate_resume(resume_text: str, job_description: str) -> dict:
     """Call Gemini to evaluate the resume and parse the JSON response."""
     prompt = RESUME_EVAL_PROMPT.format(
         resume_text=resume_text,
         job_description=job_description,
     )
     try:
-        raw = asyncio.run(generate_text(prompt))
+        raw = await generate_text(prompt)
         body = raw[raw.find("{") : raw.rfind("}") + 1]
         return json.loads(body)
     except json.JSONDecodeError as err:
