@@ -8,7 +8,7 @@ from utils import copy_to_clipboard, load_css
 
 # Load environment variables
 load_dotenv(find_dotenv())
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+API_URL = os.getenv("API_URL", "http://localhost:8000/api")
 
 # Page configuration
 st.set_page_config(page_title="Job Description Generator", page_icon="🦉")
