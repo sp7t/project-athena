@@ -25,15 +25,29 @@ git clone https://github.com/sp7t/project-athena.git
 cd project-athena
 ```
 
-### 2. Install Dependencies & Pre-commit Hooks
+### 2. Install Dependencies & Git Hooks
 
-We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up pre-commit hooks to ensure code quality and consistency.
+We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up Git hooks to ensure code quality and consistency.
 
 ```bash
 make install
 ```
 
-### 3. Set Up Environment Variables
+### 3. Configure Git for Linear History
+
+To maintain a clean, linear project history, configure Git to always rebase when pulling changes:
+
+```bash
+git config --global pull.rebase true
+git config --global rebase.autoStash true
+```
+
+These settings ensure that:
+
+- `git pull` will automatically rebase your local commits on top of the remote changes
+- Your work-in-progress changes are automatically stashed and restored during rebase
+
+### 4. Set Up Environment Variables
 
 Environment variables are crucial for configuring the application, especially for API keys and other sensitive information.
 
