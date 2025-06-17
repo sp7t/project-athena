@@ -3,6 +3,16 @@
   "editor.formatOnSave": true,
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.showEditor": false,
+  "conventionalCommits.scopes": [
+    "frontend",
+    "backend",
+    "shared",
+    "docs",
+    "ci",
+    "config",
+    "database",
+    "api"
+  ],
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
   }
