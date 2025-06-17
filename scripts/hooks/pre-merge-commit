@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# pre-merge-commit hook to prevent merge commits
+# This hook prevents all merge commits to maintain linear history
+#
+
+echo "❌ Merge commits are not allowed in this repository!"
+echo ""
+echo "To maintain linear history, please use rebase instead of merge."
+echo ""
+echo "For more information, see the CONTRIBUTING.md file."
+
+exit 1
