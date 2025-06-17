@@ -6,6 +6,10 @@ install:
 	@echo "Installing dependencies and pre-commit hooks..."
 	uv sync
 	uv run pre-commit install
+	@echo "Installing Git hooks..."
+	cp scripts/hooks/pre-merge-commit .git/hooks/pre-merge-commit
+	chmod +x .git/hooks/pre-merge-commit
+	@echo "✅ Git hooks installed successfully!"
 
 backend:
 ifeq ($(ENV),dev)
