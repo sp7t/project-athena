@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from .exceptions import GeminiError
@@ -44,6 +45,8 @@ async def evaluate_resume(data: ResumeInput) -> dict:
 
     """
     try:
-        return get_gemini_score(data.resume_text, data.job_description)
+        return await run_in_threadpool(
+            get_gemini_score, data.resume_text, data.job_description
+        )
     except GeminiError as ge:
         raise HTTPException(status_code=503, detail=str(ge)) from ge
