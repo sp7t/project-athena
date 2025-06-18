@@ -1,9 +1,13 @@
 from backend.core.llm import generate_text  # Import from your standardized llm.pypip
 from backend.email_generator.prompts import EMAIL_GENERATION_PROMPT
+from backend.email_generator.schemas import EmailRequest
 
 
 async def generate_email(
-    candidate: dict, verdict: str, rejection_reason: str, notes: str
+    candidate: EmailRequest,
+    verdict: str,
+    rejection_reason: str | None = None,
+    notes: str | None = None,
 ) -> str:
     """Generate an email based on candidate information, verdict, rejection reason, and notes.
 
@@ -18,10 +22,10 @@ async def generate_email(
 
     """
     prompt = EMAIL_GENERATION_PROMPT.format(
-        name=candidate["name"],
-        title=candidate["title"],
-        experience=candidate["experience"],
-        skills=", ".join(candidate["skills"]),
+        name=candidate.name,
+        title=candidate.title,
+        experience=candidate.experience,
+        skills=", ".join(candidate.skills),
         verdict=verdict,
         rejection_reason=rejection_reason or "N/A",
         notes=notes or "N/A",
