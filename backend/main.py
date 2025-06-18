@@ -8,9 +8,9 @@ from backend.candidate_comparison_tool.router import (
 from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
 
-router = APIRouter()
-router.include_router(job_descriptions_router)
-router.include_router(candidate_comparison_router)
+api_router = APIRouter()
+api_router.include_router(job_descriptions_router)
+api_router.include_router(candidate_comparison_router)
 
 app = FastAPI(
     title="Project Athena",
@@ -41,3 +41,4 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 
 app.include_router(router, prefix="/api")
+app.include_router(api_router, prefix="/api")
