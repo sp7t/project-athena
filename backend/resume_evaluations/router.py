@@ -9,7 +9,7 @@ router = APIRouter(
 )
 
 
-@router.post("/evaluate")
+@router.post("/evaluate", response_model=ResumeEvaluationResponse)  # noqa: FAST001
 async def evaluate(payload: ResumeEvaluationRequest) -> ResumeEvaluationResponse:
     """Evaluate a candidate's resume against a job description using Gemini LLM.
 
