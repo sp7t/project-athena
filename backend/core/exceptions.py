@@ -1,4 +1,4 @@
-from backend.exceptions import APIException
+from fastapi import HTTPException
 
 
 class StructuredOutputError(Exception):
@@ -19,7 +19,7 @@ class StructuredOutputError(Exception):
         super().__init__(base_msg)
 
 
-class FileSizeExceededError(APIException):
+class FileSizeExceededError(HTTPException):
     """Raised when file size exceeds the maximum allowed limit."""
 
     def __init__(
@@ -28,7 +28,6 @@ class FileSizeExceededError(APIException):
         max_size: int,
         status_code: int = 413,
         detail: str | None = None,
-        debug_context: str | None = None,
     ) -> None:
         self.file_size = file_size
         self.max_size = max_size
@@ -36,12 +35,10 @@ class FileSizeExceededError(APIException):
         if detail is None:
             detail = f"File size {file_size} bytes exceeds maximum allowed size of {max_size} bytes"
 
-        super().__init__(
-            status_code=status_code, detail=detail, debug_context=debug_context
-        )
+        super().__init__(status_code=status_code, detail=detail)
 
 
-class TotalRequestSizeExceededError(APIException):
+class TotalRequestSizeExceededError(HTTPException):
     """Raised when total request size exceeds the maximum allowed limit."""
 
     def __init__(
@@ -50,7 +47,6 @@ class TotalRequestSizeExceededError(APIException):
         max_size: int,
         status_code: int = 413,
         detail: str | None = None,
-        debug_context: str | None = None,
     ) -> None:
         self.total_size = total_size
         self.max_size = max_size
@@ -58,6 +54,20 @@ class TotalRequestSizeExceededError(APIException):
         if detail is None:
             detail = f"Total request size {total_size} bytes exceeds maximum allowed size of {max_size} bytes"
 
-        super().__init__(
-            status_code=status_code, detail=detail, debug_context=debug_context
-        )
+        super().__init__(status_code=status_code, detail=detail)
+
+
+class LLMQuotaExceeded(HTTPException):
+    """Custom exception for quota exhaustion from LLM providers."""
+
+    def __init__(
+        self, detail: str = "LLM quota exceeded", status_code: int = 429
+    ) -> None:
+        """Initialize LLMQuotaExceeded with a detail message and optional status code.
+
+        Args:
+            detail (str, optional): Description of the error. Defaults to "LLM quota exceeded".
+            status_code (int, optional): HTTP status code. Defaults to 429.
+
+        """
+        super().__init__(status_code=status_code, detail=detail)
