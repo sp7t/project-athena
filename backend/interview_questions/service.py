@@ -28,6 +28,6 @@ async def generate_interview_questions(
     )
     generated = await generate_text(prompt)
     # Split into a list of questions (handles Q1:, Q2:, etc.)
-    questions = re.split(r"\n(?=Q\\d+:)", generated.strip())
+    questions = re.split("\n(?=Q\\d+:)", generated.strip())
     # Remove empty strings and strip whitespace
     return [q.strip() for q in questions if q.strip()]
