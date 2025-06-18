@@ -1,55 +1,76 @@
-# This module contains the prompt templates for generating job descriptions.
-# Main job description template
-JOB_DESCRIPTION_TEMPLATE = """
-Generate a detailed and professional job description for a **{job_title}** role at a U.S.-based tech company. Use a tone that is clear, structured, and appealing to experienced professionals.
+# This module contains the prompt templates for generating job descriptions using an LLM.
+# The LLM must return strict JSON format to either generate a job description or report an input error.
+
+# Main job description prompt (returns JSON: either job_description or error)
+JOB_DESCRIPTION_PROMPT = """
+You are an expert HR assistant helping generate professional, structured job descriptions.
+
+You will receive the following inputs:
+- **Job Title**: {job_title}
+- **Custom Note**: {custom_note}
+- **Key Focus Areas**: {key_focus}
+- **Benefits**: {benefits}
 
 ---
 
 **Guardrails:**
-- Do not invent company-specific details. Assume the company is a mid-to-large U.S. tech firm.
-- Reject or return a polite error if the input values (job title, custom note, or key skills) appear nonsensical or unrelated to a real job description.
-- Only generate content if the job title sounds like a legitimate role (e.g., “Software Engineer,” “Data Analyst”). If it's a placeholder or fake (e.g., “asdf”, “blah”), do not proceed.
-- Keep the tone professional, informative, and concise—avoid overly casual or buzzword-heavy language.
-- Follow the section structure exactly as provided.
-- Use bullet points for clarity, and avoid repetition.
-- Do not include salary information unless explicitly specified.
-- If the {custom_note} includes terms such as “undergrad student”, “opt student”, “cpt student”, or “f1 student” (not case-sensitive), include relevant notes.
-- Don't include work authorization or visa sponsorship details unless explicitly requested.
+
+1. **Input Validation**:
+    - Accept valid acronyms and short forms like “ML”, “C++”, “BI”, “exp”, “yrs”, etc.
+    - If the job title or key focus areas are gibberish, placeholders (e.g., "asdf", "blah", "test"), or contain irrelevant characters (e.g., emojis, random numbers, symbols), reject the input.
+    - Do not invent company names or use buzzwords.
+    - Do not include salary or visa sponsorship info unless explicitly requested.
+    - If any input appears irrelevant or invalid, respond with this JSON:
+      ```json
+      {{
+        "error": "The job title or provided information does not appear to be valid for generating a professional job description."
+      }}
+      ```
+
+2. **Experience Alignment (based on Custom Note)**:
+    - If `custom_note` includes academic status (e.g., "Bachelor's in CS", "pursuing Master's", "F1 student", "CPT", "OPT"), adjust responsibilities to match limited experience. Assume:
+        - "Pursuing Master's" or "currently enrolled" → 0-1 years
+        - "Bachelor's degree" (no experience mentioned) → 0-1 years
+        - "Master's" (no experience mentioned) → 0-2 years
+        - "Master's + 1-3 years" → early career
+        - "Master's + 5+ years" → mid-career
+    - If the job title implies seniority (e.g., “Senior Engineer”, “Lead Analyst”) but the custom note suggests limited experience (e.g., “Intern”, “F1 student”, “Bachelor's”), reject with:
+      ```json
+      {{
+        "error": "The experience level mentioned in the custom note does not match the seniority implied by the job title. Please review your inputs."
+      }}
+      ```
+
+3. **If inputs are valid**, generate a job description in this JSON format:
+    ```json
+    {{
+      "job_description": "markdown-formatted job description (see structure below)"
+    }}
+    ```
 
 ---
 
-1. **About the Job**
-   - Start with a 2–3 sentence overview of the role, including the team or department context.
-   - Then include this custom note: "{custom_note}"
-   - Highlight key responsibilities, tools, or impact areas in 3–5 bullet points.
-   - Each bullet point should be 1–2 sentences long to provide clear, descriptive context.
-   - Use professional language with specifics where applicable.
-   - Avoid generic phrases like "work on exciting projects" or "be part of a dynamic team." Instead, focus on tangible responsibilities and technologies used.
-   - If experience level is specified, tailor the description to that level (e.g., 1 yr, 7 yr).
+**Job Description Format (Markdown)**
+
+1. **About the Job**edit
+   - Start with 2-3 sentences summarizing the role, context, and team.
+   - Then include this sentence: "custom_note"
+   - Add 3-5 bullet points explaining key responsibilities or tools. Each bullet must be 1-2 sentences.
 
 2. **Required Skills**
-   - List 10–12 specific technical and soft skills related to **{key_focus}**.
-   - Include tools, technologies, methodologies, and relevant interpersonal skills.
-   - Each bullet point should explain why the skill is important or how it's applied in the role.
-""".strip()  # noqa: RUF001
+   - List 10-12 bullet points that mix technical + soft skills from "key_focus".
+   - Each should briefly explain why the skill matters or how it's used.
 
-# Optional benefits section
-JOB_BENEFITS_SECTION = """
 3. **Featured Benefits**
-   - Include the following benefits as bullet points:
-{benefits}
-""".strip()
+   - List each benefit from "benefits" as a bullet point.
+   - Do not fabricate additional benefits.
 
-# Final safety guardrail message
-PROMPT_SUFFIX = """
-Only generate a job description if the inputs are appropriate. If the input appears irrelevant, respond with:
-"**Error:** The job title or provided information does not appear to be valid for generating a professional job description."
-""".strip()
+---
 
-# OpenAI-style simple prompt (e.g., used in fallback models)
-OPENAI_JOB_DESCRIPTION_PROMPT = (
-    "Create a detailed and engaging job description for the following role: {title}\n"
-    "Details: {details}\n"
-    "Write the job description in markdown format. No backticks or code fences.\n"
-    "Do not include any other text in your response. Only return the job description."
-)
+**Instructions:**
+- Respond with only the **raw JSON object** as text. Do NOT include:
+  - Markdown code blocks (e.g., no ```json or ``` at all)
+  - Comments, introductions, or explanations
+- The response MUST be valid JSON starting with `{{` and ending with `}}`
+- Ensure all quotation marks and special characters are escaped properly
+""".strip()
