@@ -1,4 +1,5 @@
-def build_prompt(resume_text, job_description):
+def build_prompt(resume_text: str, job_description: str) -> str:
+    """Build a prompt for Gemini model using resume and job description."""
     return f"""
 You are an advanced Applicant Tracking System (ATS) designed to evaluate a resume against a job description (JD).
 
