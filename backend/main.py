@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from backend.email_generator.router import router as email_generator_router
-from backend.exceptions import APIException
+from backend.exceptions import APIException  # from develop branch
 from backend.job_descriptions.router import router as job_descriptions_router
 from backend.resume_evaluations.router import router as resume_evaluations_router
 
@@ -29,6 +29,7 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
 
+# Global fallback exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001
     """Handle unexpected exceptions with generic error responses."""
@@ -40,4 +41,5 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
     )
 
 
+# Register all routers with /api prefix
 app.include_router(router, prefix="/api")

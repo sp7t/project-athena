@@ -69,7 +69,6 @@ async def generate_text(prompt: str, files: list[FileInput] | None = None) -> st
         contents.extend(file_parts)
 
     contents.append(prompt)
-
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=contents,
@@ -108,7 +107,6 @@ async def generate_structured_output(
         contents.extend(file_parts)
 
     contents.append(prompt)
-
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=contents,
