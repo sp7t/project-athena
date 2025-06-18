@@ -21,18 +21,15 @@ class JobDescriptionServiceError(HTTPException):
         super().__init__(status_code=status_code, detail=detail)
 
 
-class InvalidJobInputError(HTTPException):
-    """Raised when the input provided to the job description service is invalid or irrelevant.
-
-    Automatically returns a 400 Bad Request response.
-    """
+class InvalidJobRequirementsError(HTTPException):
+    """Raised when the input to the job description service is irrelevant or inappropriate."""
 
     def __init__(
         self,
         detail: str = "The job title or provided information does not appear valid for generating a job description.",
         status_code: int = 400,
     ) -> None:
-        """Initialize the invalid input error with a custom message and status code."""
+        """Initialize the InvalidJobRequirementsError with a detail message and status code."""
         super().__init__(status_code=status_code, detail=detail)
 
 
