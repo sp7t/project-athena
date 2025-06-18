@@ -4,11 +4,11 @@ from json import JSONDecodeError
 from typing import Never
 
 from backend.core.llm import generate_text
+from backend.job_descriptions.constants import JOB_DESCRIPTION_PROMPT
 from backend.job_descriptions.exceptions import (
-    InvalidJobInputError,
+    InvalidJobRequirementsError,
     raise_service_error,
 )
-from backend.job_descriptions.prompts import JOB_DESCRIPTION_PROMPT
 
 
 def extract_json_string(text: str) -> str:
@@ -22,7 +22,7 @@ def extract_json_string(text: str) -> str:
 
 def raise_invalid_input_error(message: str) -> Never:
     """Raise InvalidJobInputError with the given message."""
-    raise InvalidJobInputError(detail=message)
+    raise InvalidJobRequirementsError(detail=message)
 
 
 async def generate_job_description(
@@ -55,7 +55,7 @@ async def generate_job_description(
 
         return data["job_description"]
 
-    except InvalidJobInputError:
+    except InvalidJobRequirementsError:
         raise
     except JSONDecodeError as e:
         raise_service_error(
