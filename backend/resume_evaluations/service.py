@@ -19,15 +19,11 @@ async def evaluate_resume(resume_text: str, job_description: str) -> dict:
         end = raw_response.rfind("}") + 1
         if start == -1 or end == -1:
             msg = "Unable to locate JSON object in LLM response"
-            raise ResumeEvaluationError(msg)  # noqa: TRY301
+            raise ResumeEvaluationError(msg)
 
         json_body = raw_response[start:end]
         return json.loads(json_body)
 
     except json.JSONDecodeError as err:
         msg = f"JSON parse error: {err}"
-        raise ResumeEvaluationError(msg) from err
-
-    except Exception as err:
-        msg = f"Resume evaluation failed: {err}"
         raise ResumeEvaluationError(msg) from err
