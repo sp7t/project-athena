@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from backend.email_generator.schemas import (
     EmailGenerationRequest,
