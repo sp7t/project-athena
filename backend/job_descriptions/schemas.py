@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class JobDescriptionRequest(BaseModel):
-    """Input model for generating a job description."""
+    """Request model for generating a job description."""
 
     title: str = Field(
         default=...,
@@ -27,7 +27,7 @@ class JobDescriptionRequest(BaseModel):
 
 
 class JobDescriptionResponse(BaseModel):
-    """Output model containing the generated job description."""
+    """Response model containing the generated job description."""
 
     job_description: str = Field(
         default=...,
