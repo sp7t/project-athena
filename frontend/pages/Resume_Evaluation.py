@@ -60,6 +60,13 @@ def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) ->
             render_scorecard_html(label.replace("_", " ").title(), score, total)
 
 
+def render_candidate_info(data: dict[str, Any]) -> None:
+    """Display the candidate's full name if available."""
+    name = data.get("candidate_name")
+    if name:
+        st.markdown(f"<h2>Candidate: {name}</h2>", unsafe_allow_html=True)
+
+
 def render_feedback_sections(data: dict[str, Any]) -> None:
     """Render feedback sections: summary, detailed feedback, missing qualifications, suggestions."""
     st.markdown("<h3>Summary Feedback</h3>", unsafe_allow_html=True)
