@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import IO, Any
 
+import requests
 import streamlit as st
 from PyPDF2 import PdfReader
+from PyPDF2.errors import PdfReadError
 
 from frontend.components.header import render_header
 from frontend.components.scorecard import render_scorecard_html
@@ -36,8 +38,14 @@ def render_custom_textarea_label() -> None:
 
 def extract_resume_text(pdf_file: IO[bytes]) -> str:
     """Extract text from uploaded PDF file."""
-    pdf = PdfReader(pdf_file)
-    return "\n".join(page.extract_text() or "" for page in pdf.pages)
+    try:
+        pdf = PdfReader(pdf_file)
+        return "\n".join(page.extract_text() or "" for page in pdf.pages)
+    except PdfReadError as e:
+        st.error(f"PDF read error: {e!s}")
+    except Exception as e:  # fallback for unexpected errors  # noqa: BLE001
+        st.error(f"Unexpected error extracting text: {e!s}")
+    return ""
 
 
 def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) -> None:
@@ -64,13 +72,25 @@ def render_feedback_sections(data: dict[str, Any]) -> None:
 
     st.markdown("<h3>Missing Qualifications</h3>", unsafe_allow_html=True)
     missing = data.get("missing_qualifications", [])
+    if not missing:
+        st.write("None identified.")
     for item in missing:
         st.write(f"- {item}")
 
     st.markdown("<h3>Improvement Suggestions</h3>", unsafe_allow_html=True)
     suggestions = data.get("improvement_suggestions", [])
+    if not suggestions:
+        st.write("No suggestions provided.")
     for item in suggestions:
         st.write(f"- {item}")
+
+
+def render_verdict_section(data: dict[str, Any]) -> None:
+    """Render the final verdict section if available."""
+    verdict = data.get("verdict")
+    if verdict:
+        st.markdown("### Verdict")
+        st.success(verdict)
 
 
 # Set page config
@@ -96,7 +116,21 @@ if submit:
         st.stop()
 
     resume_text = extract_resume_text(resume_file)
-    data = analyze_resume(resume_text, job_description)
+    if not resume_text.strip():
+        st.error("Resume text is empty. Please upload a valid PDF.")
+        st.stop()
+
+    try:
+        data = analyze_resume(resume_text, job_description)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Network error during resume analysis: {e!s}")
+        st.stop()
+    except ValueError as e:
+        st.error(f"Data processing error: {e!s}")
+        st.stop()
+    except Exception as e:  # noqa: BLE001
+        st.error(f"Unexpected error during analysis: {e!s}")
+        st.stop()
 
     score_max = {
         "skills_match": 30,
@@ -115,6 +149,7 @@ if submit:
 
     render_individual_scores(data, score_max)
     render_feedback_sections(data)
+    render_verdict_section(data)
 
 # Footer
 st.markdown(
