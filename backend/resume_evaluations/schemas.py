@@ -23,6 +23,7 @@ class ResumeEvaluationRequest(BaseModel):
 class ResumeEvaluationResponse(BaseModel):
     """Full JSON response from the resume-evaluation service."""
 
+    candidate_name: str  # Full name of the candidate
     estimated_experience_years: float
     verdict: str
     skills_match: int
