@@ -12,7 +12,7 @@ if [[ "$branch" == "main" || "$branch" == "develop" ]]; then
 fi
 
 # Check if branch name matches the required format
-if [[ "$branch" =~ ^(feat|fix|chore|refactor|style|test|docs)/(frontend|backend|shared|docs|ci|config|database|api)-#[0-9]+-[a-z0-9-]+$ ]]; then
+if [[ "$branch" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/(frontend|backend|shared|docs|ci|config|database|api)-#[0-9]+-[a-z0-9-]+$ ]]; then
     exit 0
 else
     echo "❌ Invalid branch name: $branch"
