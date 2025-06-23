@@ -154,6 +154,7 @@ if submit:
         f"<h2>Resume Evaluation Score: {ats_score}/100</h2>", unsafe_allow_html=True
     )
 
+    render_candidate_info(data)
     render_individual_scores(data, score_max)
     render_feedback_sections(data)
     render_verdict_section(data)
