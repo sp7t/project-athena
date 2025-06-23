@@ -1,7 +1,3 @@
-# This module contains the prompt templates for generating job descriptions using an LLM.
-# The LLM must return strict JSON format to either generate a job description or report an input error.
-
-# Main job description prompt (returns JSON: either job_description or error)
 JOB_DESCRIPTION_PROMPT = """
 You are an expert HR assistant helping generate professional, structured job descriptions.
 
@@ -52,7 +48,7 @@ You will receive the following inputs:
 
 **Job Description Format (Markdown)**
 
-1. **About the Job**edit
+1. **About the Job**
    - Start with 2-3 sentences summarizing the role, context, and team.
    - Then include this sentence: "custom_note"
    - Add 3-5 bullet points explaining key responsibilities or tools. Each bullet must be 1-2 sentences.

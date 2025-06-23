@@ -18,7 +18,7 @@ app = FastAPI(
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:  # noqa: ARG001
     """Handle custom API exceptions with structured error responses."""
-    logger.error("API Exception: {}", exc.detail)
+    logger.error("API Exception: {}", str(exc))
 
     return JSONResponse(
         status_code=exc.status_code,

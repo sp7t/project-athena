@@ -4,18 +4,15 @@ from pydantic import BaseModel, Field
 class JobDescriptionRequest(BaseModel):
     """Request model for generating a job description."""
 
-    title: str = Field(
-        default=...,
+    job_title: str = Field(
         description="The job title (e.g., Data Scientist, Product Manager).",
         examples=["Data Scientist"],
     )
     custom_note: str = Field(
-        default=...,
         description="Any custom note like visa requirements or internal comments.",
         examples=["US Citizens only"],
     )
     key_focus: str = Field(
-        default=...,
         description="Comma-separated technical and soft skills to emphasize.",
         examples=["Python, SQL, Machine Learning"],
     )
@@ -30,6 +27,5 @@ class JobDescriptionResponse(BaseModel):
     """Response model containing the generated job description."""
 
     job_description: str = Field(
-        default=...,
         description="The generated job description in markdown format.",
     )
