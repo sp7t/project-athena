@@ -18,9 +18,9 @@ async def create_job_description(
 ) -> JobDescriptionResponse:
     """Generate a job description using LLM based on title, note, key focus, and benefits."""
     description = await generate_job_description(
-        job_title=request.title,
+        job_title=request.job_title,
         custom_note=request.custom_note,
         key_focus=request.key_focus,
-        benefits=request.benefits or "",
+        benefits=request.benefits,
     )
     return JobDescriptionResponse(job_description=description)
