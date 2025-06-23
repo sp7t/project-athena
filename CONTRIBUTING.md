@@ -261,6 +261,12 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
 9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
+11. Delete the feature branch locally and remotely to keep the repository clean:
+    ```bash
+    git checkout develop
+    git branch -d fix/backend-#101-fix-auth-token-expiry  # Delete local branch
+    git push origin --delete fix/backend-#101-fix-auth-token-expiry  # Delete remote branch
+    ```
 
 ### Recommended Workflow for Full-Stack Features
 
