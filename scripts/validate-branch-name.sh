@@ -12,14 +12,14 @@ if [[ "$branch" == "main" || "$branch" == "develop" ]]; then
 fi
 
 # Check if branch name matches the required format
-if [[ "$branch" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/(frontend|backend|shared|docs|ci|config|database|api)-#[0-9]+-[a-z0-9-]+$ ]]; then
+if [[ "$branch" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|enhancement)/(frontend|backend|shared|docs|ci|config|database|api)-#[0-9]+-[a-z0-9-]+$ ]]; then
     exit 0
 else
     echo "❌ Invalid branch name: $branch"
     echo ""
     echo "Branch name must follow format: <type>/<scope>-#<issue-number>-<short-description>"
     echo ""
-    echo "Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+    echo "Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, enhancement"
     echo "Valid scopes: frontend, backend, shared, docs, ci, config, database, api"
     echo ""
     echo "Examples:"
@@ -30,5 +30,6 @@ else
     echo "  feat/api-#202-user-authentication-endpoint"
     echo "  fix/database-#303-migration-script-error"
     echo "  chore/ci-#404-update-github-actions"
+    echo "  enhancement/frontend-#505-improve-ui-performance"
     exit 1
 fi 
