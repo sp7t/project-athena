@@ -12,7 +12,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 async def generate_text(prompt: str) -> str:
-    """Generate text using the specified Gemini model."""
+    """Generate free-form text using the specified Gemini model."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=[prompt],
@@ -21,7 +21,7 @@ async def generate_text(prompt: str) -> str:
 
 
 async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
-    """Generate structured output using the specified Gemini model and Pydantic schema."""
+    """Generate structured output from Gemini and parse it using the provided Pydantic model."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=[prompt],
