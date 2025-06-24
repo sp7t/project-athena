@@ -1,5 +1,15 @@
 from fastapi import HTTPException
 
+class StructuredOutputError(Exception):
+    """Raised when Gemini response cannot be parsed into the requested schema."""
+
+    def __init__(self, schema_name: str, raw_response: str) -> None:
+        self.schema_name = schema_name
+        self.raw_response = raw_response
+        super().__init__(
+            f"Failed to parse Gemini response into {schema_name} [Raw Response: {raw_response[:500]}...]"
+        )
+
 
 class LLMGenerationError(HTTPException):
     """Custom exception for errors during LLM text generation."""
@@ -10,7 +20,6 @@ class LLMGenerationError(HTTPException):
         Args:
             detail (str): Description of the error.
             status_code (int, optional): HTTP status code. Defaults to 500.
-
         """
         super().__init__(status_code=status_code, detail=detail)
 
@@ -26,6 +35,6 @@ class LLMQuotaExceeded(HTTPException):
         Args:
             detail (str, optional): Description of the error. Defaults to "LLM quota exceeded".
             status_code (int, optional): HTTP status code. Defaults to 429.
-
         """
         super().__init__(status_code=status_code, detail=detail)
+

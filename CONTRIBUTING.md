@@ -25,15 +25,29 @@ git clone https://github.com/sp7t/project-athena.git
 cd project-athena
 ```
 
-### 2. Install Dependencies & Pre-commit Hooks
+### 2. Install Dependencies & Git Hooks
 
-We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up pre-commit hooks to ensure code quality and consistency.
+We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up Git hooks to ensure code quality and consistency.
 
 ```bash
 make install
 ```
 
-### 3. Set Up Environment Variables
+### 3. Configure Git for Linear History
+
+To maintain a clean, linear project history, configure Git to always rebase when pulling changes:
+
+```bash
+git config --global pull.rebase true
+git config --global rebase.autoStash true
+```
+
+These settings ensure that:
+
+- `git pull` will automatically rebase your local commits on top of the remote changes
+- Your work-in-progress changes are automatically stashed and restored during rebase
+
+### 4. Set Up Environment Variables
 
 Environment variables are crucial for configuring the application, especially for API keys and other sensitive information.
 
@@ -237,7 +251,7 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 
 ### Example Workflow Summary
 
-1.  Intern picks up issue `#101` (e.g., a backend bug).
+1.  Developer picks up issue `#101` (e.g., a backend bug).
 2.  Ensures `develop` is up to date: `git checkout develop && git pull origin develop`.
 3.  Creates a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
 4.  Makes changes, commits them using Conventional Commits.
@@ -245,8 +259,76 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 6.  Pushes branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
 7.  Opens a PR against `develop`.
 8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
-9.  After review and approval, the PR is merged by your supervisor.
+9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
+11. Delete the feature branch locally and remotely to keep the repository clean:
+    ```bash
+    git checkout develop
+    git branch -d fix/backend-#101-fix-auth-token-expiry  # Delete local branch
+    git push origin --delete fix/backend-#101-fix-auth-token-expiry  # Delete remote branch
+    ```
+
+### Recommended Workflow for Full-Stack Features
+
+When working on features that involve both backend and frontend changes, follow this sequence to ensure smooth development:
+
+**Why Backend First?**
+Since our frontend depends on the backend APIs, it's essential to have the backend functionality working before implementing the UI. This approach ensures that:
+
+- Frontend developers have working APIs to integrate with
+- Functionality is prioritized over appearance (which is the right approach)
+- Integration issues are caught early
+- Testing can be done incrementally
+
+**Step-by-Step Process:**
+
+1. **Backend Development:**
+
+   ```bash
+   # Create backend branch
+   git checkout -b feat/backend-#123-user-authentication develop
+
+   # Implement backend functionality
+   # - Add API endpoints
+   # - Implement business logic
+   # - Add tests
+   # - Update documentation
+
+   # Submit backend PR
+   git push origin feat/backend-#123-user-authentication
+   # Open PR against develop, get it reviewed and merged
+   ```
+
+2. **Frontend Development (after backend is merged):**
+
+   ```bash
+   # Update your develop branch
+   git checkout develop
+   git pull origin develop
+
+   # Create frontend branch
+   git checkout -b feat/frontend-#123-user-authentication develop
+
+   # Implement frontend functionality
+   # - Create UI components
+   # - Integrate with backend APIs
+   # - Add user interactions
+   # - Test the complete flow
+
+   # Submit frontend PR
+   git push origin feat/frontend-#123-user-authentication
+   # Open PR against develop
+   ```
+
+**Important Notes:**
+
+- Use separate branches for backend and frontend work, even if they're for the same feature
+- Both PRs should reference the same issue number (e.g., `#123`)
+- Only the final frontend PR should include `Closes #123` to auto-close the issue
+- The backend PR can use `Refs #123` to link without closing
+- Test the complete end-to-end functionality before marking the feature as complete
+
+This workflow ensures that each component is properly reviewed and tested before moving to the next layer of the application.
 
 ## 🎨 Coding Standards
 
@@ -276,10 +358,10 @@ backend/
 │ ├── __init__.py       # Standard Python package marker.
 │ ├── router.py         # Defines API endpoints (FastAPI routers) for this module. Handles HTTP requests and responses.
 │ ├── service.py        # Contains the core business logic for the module. Orchestrates operations, calling repositories and other services.
-│ ├── repository.py     # Handles data access and persistence. Interacts directly with the database.
 │ ├── schemas.py        # Pydantic models used for API request/response validation, serialization, and as Data Transfer Objects (DTOs) between layers.
-│ ├── models.py         # (If using an ORM or distinct domain models) Defines the structure of your data, often corresponding to database tables or rich domain objects.
 │ ├── exceptions.py     # Custom exception classes specific to this module, helping to handle errors gracefully.
+│ ├── utils.py          # Helper functions and utilities specific to this module. Contains reusable code that doesn't fit elsewhere.
+│ └── constants.py      # Module-specific constants, enums, and configuration values that don't change during runtime.
 ```
 
 This structure promotes separation of concerns and makes it easier to navigate and maintain the codebase as it grows. When creating new features or modules, try to follow this pattern.
