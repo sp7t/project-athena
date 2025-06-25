@@ -18,6 +18,7 @@ app = FastAPI(
 )
 
 
+
 # Custom exception handler for APIException
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:  # noqa: ARG001
@@ -30,7 +31,6 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
 
-# Global fallback exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001
     """Handle unexpected exceptions with generic error responses."""

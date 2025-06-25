@@ -1,4 +1,4 @@
-from backend.core.llm import generate_text  # Import from your standardized llm.pypip
+from backend.core.llm import generate_text
 from backend.email_generator.prompts import EMAIL_GENERATION_PROMPT
 from backend.email_generator.schemas import EmailRequest
 
