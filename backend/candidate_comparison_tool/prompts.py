@@ -1,16 +1,24 @@
-def build_prompt(resume_text: str, job_description: str) -> str:
-    """Build a prompt for Gemini model using resume and job description."""
-    return f"""
-You are an advanced Applicant Tracking System (ATS) designed to evaluate a resume against a job description (JD).
+def build_comparison_prompt(job_description: str, resumes: list[str]) -> str:
+    """Build a prompt for Gemini to compare multiple resumes to a single job description.
 
-### Instructions:
-1. Analyze the resume and the job description to extract key qualifications:
+    This prompt will instruct Gemini to score each resume,
+    then produce a structured JSON output including a final comparison summary.
+    """
+    resumes_section = "\n\n".join(
+        [f"Resume {i + 1}:\n{resume}" for i, resume in enumerate(resumes)]
+    )
+
+    return f"""
+You are an advanced Candidate Comparison Engine for an Applicant Tracking System (ATS).
+
+## Instructions:
+1. Compare each resume **individually** against the **same job description**.
+2. Extract key qualifications for each:
    - Minimum years of experience
-   - Required tools/technologies
+   - Tools & technologies
    - Domain knowledge
-   - Required degrees or certifications
-2. Evaluate the resume strictly against the job description requirements.
-3. Score the resume using the following breakdown (total 100 points):
+   - Degrees/certifications
+3. Score **each resume**:
    - Skills Match (30)
    - Experience Relevance (20)
    - Keyword Match (15)
@@ -19,36 +27,32 @@ You are an advanced Applicant Tracking System (ATS) designed to evaluate a resum
    - Formatting (5)
    - Additional Value (5)
 
-Please return your output strictly in valid JSON format exactly like this:
+4. After scoring **each resume**, generate a **final comparison summary**:
+   - Who is the strongest fit and why.
+   - Key strengths & weaknesses for each candidate.
+
+Return your output strictly in **valid JSON** with this structure:
 
 {{
-  "Estimated Experience": "4.2 years",
-  "ATS Match Score": 85,
-  "Verdict": "Suitable",
-  "Summary Feedback": "Strong match on technical skills and experience.",
-  "Skills Match": 25,
-  "Experience Relevance": 15,
-  "Keyword Match": 10,
-  "Projects": 12,
-  "Education": 8,
-  "Formatting": 4,
-  "Additional Value": 3,
-  "Detailed Feedback": {{
-      "Skills Match": "Your full paragraph feedback for skills match.",
-      "Experience Relevance": "Your full paragraph feedback for experience relevance.",
-      "Keyword Match": "Your full paragraph feedback for keyword match.",
-      "Projects": "Your full paragraph feedback for projects.",
-      "Education": "Your full paragraph feedback for education.",
-      "Formatting": "Your full paragraph feedback for formatting.",
-      "Additional Value": "Your full paragraph feedback for additional value."
-  }}
+  "candidates": [
+    {{
+      "name": "Resume 1",
+      "ATS Match Score": 85,
+      "Verdict": "Strong fit",
+      "Skills Match": 25,
+      "Experience Relevance": 15
+    }},
+    {{
+      "name": "Resume 2",
+      "ATS Match Score": 78
+    }}
+  ],
+  "comparison_summary": "Who is the best fit and why."
 }}
 
-Now score this resume:
-
-Resume:
-{resume_text}
-
-Job Description:
+## Job Description:
 {job_description}
+
+## Resumes:
+{resumes_section}
 """

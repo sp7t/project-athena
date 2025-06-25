@@ -1,13 +1,12 @@
 import os
-
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
-from backend.candidate_comparisons.router import router as candidate_comparisons_router
-from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
 from backend.resume_evaluations.router import router as resume_evaluations_router
+from backend.candidate_comparisons.router import router as candidate_comparisons_router
+from backend.exceptions import APIException
 
 # Only log APIException.debug_context when explicitly enabled
 LOG_API_DEBUG_CONTEXT = os.getenv("LOG_API_DEBUG_CONTEXT", "").lower() in {
