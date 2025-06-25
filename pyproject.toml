@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.115.12",
     "google-genai>=1.12.1",
+    "loguru>=0.7.3",
     "pydantic>=2.11.3",
     "pydantic-settings>=2.9.1",
     "pyperclip>=1.9.0",
@@ -29,6 +30,7 @@ select = ["ALL"]
 ignore = [
     "D100",     # undocumented-public-module
     "D104",     # undocumented-public-package
+    "D107",     # undocumented-public-init
 
     # CONFLICTING LINTING & FORMAT RULES
     "COM812",   # missing-trailing-comma
