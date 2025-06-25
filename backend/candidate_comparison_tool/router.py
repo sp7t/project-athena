@@ -1,52 +1,30 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
 
-from .exceptions import GeminiError
-from .service import get_gemini_score
+from backend.candidate_comparison_tool.exceptions import GeminiError
+from backend.candidate_comparison_tool.schemas import (
+    CandidateComparisonLLMResponse,
+    CandidateComparisonRequest,
+)
+from backend.candidate_comparison_tool.service import get_gemini_score
 
-router = APIRouter()
-
-
-class ResumeInput(BaseModel):
-    """Input model for resume evaluation.
-
-    Attributes
-    ----------
-    resume_text : str
-        The text content of the candidate's resume.
-    job_description : str
-        The job description to compare against the resume.
-
-    """
-
-    resume_text: str
-    job_description: str
+router = APIRouter(
+    prefix="/candidate-comparisons",
+    tags=["Candidate Comparisons"],
+)
 
 
-@router.post("/evaluate", status_code=200, tags=["Candidate Comparison"])
-async def evaluate_resume(data: ResumeInput) -> dict:
-    """Evaluate a candidate's resume against a job description and return a score.
-
-    Parameters
-    ----------
-    data : ResumeInput
-        The input data containing resume text and job description.
-
-    Returns
-    -------
-    dict
-        The evaluation score and related information.
-
-    Raises
-    ------
-    HTTPException
-        If there is an error during evaluation.
-
-    """
+@router.post(
+    "/compare",
+    status_code=200,
+)
+async def compare_candidates(
+    data: CandidateComparisonRequest,
+) -> CandidateComparisonLLMResponse:
+    """Compare multiple resumes against a job description and return a summary."""
     try:
         return await run_in_threadpool(
-            get_gemini_score, data.resume_text, data.job_description
+            get_gemini_score, data.job_description, data.resumes
         )
     except GeminiError as ge:
         raise HTTPException(status_code=503, detail=str(ge)) from ge
