@@ -77,39 +77,11 @@ async def generate_text(prompt: str, files: list[FileInput] | None = None) -> st
     return response.text
 
 
-async def generate_structured_output(
-    prompt: str,
-    response_model: type[T],
-    files: list[FileInput] | None = None,
-) -> T:
-    """Generate structured output from Gemini and parse it using the provided Pydantic model.
-
-    Args:
-        prompt: The text prompt
-        response_model: Pydantic model class for structured output
-        files: Optional list of file inputs
-
-    Returns:
-        T: The parsed structured output
-
-    """
-    await _validate_total_request_size(prompt, files)
-
-    contents = []
-
-    if files:
-        file_parts = []
-        for f in files:
-            file_bytes = await f.get_file_bytes_async()
-            file_parts.append(
-                types.Part.from_bytes(data=file_bytes, mime_type=f.mime_type.value)
-            )
-        contents.extend(file_parts)
-
-    contents.append(prompt)
+async def generate_structured_output[T](prompt: str, response_model: type[T]) -> T:
+    """Generate structured output using the specified Gemini model and Pydantic schema."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
-        contents=contents,
+        contents=[prompt],
         config={
             "response_mime_type": "application/json",
             "response_schema": response_model,

@@ -54,14 +54,6 @@ class TotalRequestSizeExceededError(HTTPException):
         if detail is None:
             detail = f"Total request size {total_size} bytes exceeds maximum allowed size of {max_size} bytes"
 
-<<<<<<< HEAD
-=======
-        Args:
-            detail (str): Description of the error.
-            status_code (int, optional): HTTP status code. Defaults to 500.
-
-        """
->>>>>>> c8bec4b (modified)
         super().__init__(status_code=status_code, detail=detail)
 
 
