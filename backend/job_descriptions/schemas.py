@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
 
-from backend.core.schemas import LLMErrorResponse
-
 
 class JobDescriptionRequest(BaseModel):
     """Request model for generating a job description."""
@@ -33,4 +31,17 @@ class JobDescriptionResponse(BaseModel):
     )
 
 
-JobDescriptionLLMResponse = JobDescriptionResponse | LLMErrorResponse
+class JobDescriptionLLMOutput(BaseModel):
+    """Internal model for structured output from Gemini.
+
+    It may include either a job description or an error message.
+    """
+
+    job_description: str | None = Field(
+        default=None,
+        description="The generated job description in markdown format, if successful.",
+    )
+    error: str | None = Field(
+        default=None,
+        description="Error message if the LLM could not generate a valid job description.",
+    )

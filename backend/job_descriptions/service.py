@@ -1,12 +1,8 @@
 from backend.core.gemini import generate_structured_output
-from backend.core.schemas import LLMErrorResponse
 from backend.job_descriptions.constants import JOB_DESCRIPTION_PROMPT
-from backend.job_descriptions.exceptions import (
-    InvalidJobRequirementsError,
-)
+from backend.job_descriptions.exceptions import InvalidJobRequirementsError
 from backend.job_descriptions.schemas import (
-    JobDescriptionLLMResponse,
-    JobDescriptionResponse,
+    JobDescriptionLLMOutput,
 )
 
 
@@ -15,7 +11,7 @@ async def generate_job_description(
     custom_note: str,
     key_focus: str,
     benefits: str | None,
-) -> JobDescriptionResponse:
+) -> str:
     """Generate a job description using Gemini with structured schema validation."""
     prompt = JOB_DESCRIPTION_PROMPT.format(
         job_title=job_title,
@@ -24,11 +20,20 @@ async def generate_job_description(
         benefits=benefits,
     )
 
-    response = await generate_structured_output(
-        prompt=prompt, response_model=JobDescriptionLLMResponse
+    response_text = await generate_structured_output(
+        prompt=prompt,
+        response_model=JobDescriptionLLMOutput,
     )
 
-    if isinstance(response, LLMErrorResponse):
-        raise InvalidJobRequirementsError(detail=response.error)
+    # If Gemini returned an error message instead of a description
+    if response_text.error:
+        raise InvalidJobRequirementsError(detail=response_text.error)
 
-    return response
+    # Fallback error in case job_description is unexpectedly missing
+    if not response_text.job_description:
+        raise InvalidJobRequirementsError(
+            detail="Job description could not be generated."
+        )
+
+    # Return clean response model for the router
+    return response_text.job_description
