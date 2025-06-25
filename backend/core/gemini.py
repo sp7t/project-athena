@@ -20,7 +20,7 @@ async def generate_text(prompt: str) -> str:
     return response.text
 
 
-async def generate_structured_outputt[T](prompt: str, response_model: type[T]) -> T:
+async def generate_structured_output[T](prompt: str, response_model: type[T]) -> T:
     """Generate structured output using the specified Gemini model and Pydantic schema."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
