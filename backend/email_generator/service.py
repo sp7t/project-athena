@@ -3,32 +3,24 @@ from backend.email_generator.prompts import EMAIL_GENERATION_PROMPT
 from backend.email_generator.schemas import EmailRequest
 
 
-async def generate_email(
-    candidate: EmailRequest,
-    verdict: str,
-    rejection_reason: str | None = None,
-    notes: str | None = None,
-) -> str:
-    """Generate an email based on candidate information, verdict, rejection reason, and notes.
+async def generate_email(request: EmailRequest) -> str:
+    """Generate an email based on the EmailRequest object.
 
     Args:
-        candidate (dict): Candidate information including name, title, experience, and skills.
-        verdict (str): The verdict for the candidate.
-        rejection_reason (str): Reason for rejection, if any.
-        notes (str): Additional notes.
+        request (EmailRequest): Includes candidate info, verdict, rejection reason, and notes.
 
     Returns:
         str: The generated email text.
 
     """
     prompt = EMAIL_GENERATION_PROMPT.format(
-        name=candidate.name,
-        title=candidate.title,
-        experience=candidate.experience,
-        skills=", ".join(candidate.skills),
-        verdict=verdict,
-        rejection_reason=rejection_reason or "N/A",
-        notes=notes or "N/A",
+        name=request.candidate.name,
+        title=request.candidate.title,
+        experience=request.candidate.experience,
+        skills=", ".join(request.candidate.skills),
+        verdict=request.verdict,
+        rejection_reason=request.rejection_reason or "N/A",
+        notes=request.notes or "N/A",
     )
 
     return await generate_text(prompt)

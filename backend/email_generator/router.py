@@ -17,14 +17,8 @@ router = APIRouter(
 )
 async def generate_email_endpoint(request: EmailRequest) -> EmailGenerationResponse:
     """Generate an email response based on the given candidate and verdict."""
-    candidate_dict = request.candidate.dict()
     try:
-        email_text = await generate_email(
-            candidate_dict,
-            request.verdict,
-            request.rejection_reason,
-            request.notes,
-        )
+        email_text = await generate_email(request)
     except LLMQuotaExceeded as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
