@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from backend.core.gemini import generate_text
+=======
+from backend.core.llm import generate_text
+>>>>>>> c8bec4b (modified)
 from backend.email_generator.prompts import EMAIL_GENERATION_PROMPT
 from backend.email_generator.schemas import EmailRequest
 
