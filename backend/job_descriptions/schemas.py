@@ -24,8 +24,24 @@ class JobDescriptionRequest(BaseModel):
 
 
 class JobDescriptionResponse(BaseModel):
-    """Response model containing the generated job description."""
+    """Response model returned to the client — always contains a job description."""
 
     job_description: str = Field(
         description="The generated job description in markdown format.",
+    )
+
+
+class JobDescriptionLLMOutput(BaseModel):
+    """Internal model for structured output from Gemini.
+
+    It may include either a job description or an error message.
+    """
+
+    job_description: str | None = Field(
+        default=None,
+        description="The generated job description in markdown format, if successful.",
+    )
+    error: str | None = Field(
+        default=None,
+        description="Error message if the LLM could not generate a valid job description.",
     )
