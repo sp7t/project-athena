@@ -13,15 +13,15 @@ router = APIRouter(
 @router.post(
     "/generate",
     status_code=200,
-    tags=["Email Generator"],
 )
 async def generate_email_endpoint(request: EmailRequest) -> EmailGenerationResponse:
     """Generate an email response based on the given candidate and verdict."""
     try:
         email_text = await generate_email(request)
+        return EmailGenerationResponse(generated_email=email_text)
+
     except LLMQuotaExceeded as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Email generation failed") from exc
-
-    return EmailGenerationResponse(generated_email=email_text)

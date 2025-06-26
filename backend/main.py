@@ -18,7 +18,6 @@ app = FastAPI(
 )
 
 
-
 # Custom exception handler for APIException
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:  # noqa: ARG001
