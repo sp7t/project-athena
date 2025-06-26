@@ -6,12 +6,13 @@ from pydantic import BaseModel
 from backend.config import settings
 from backend.core.exceptions import StructuredOutputError
 
+# Initialize Gemini client
 client = genai.Client(api_key=settings.gemini_api_key)
 T = TypeVar("T", bound=BaseModel)
 
 
 async def generate_text(prompt: str) -> str:
-    """Generate text using the specified Gemini model."""
+    """Generate plain text using the specified Gemini model."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=[prompt],
@@ -31,6 +32,7 @@ async def generate_structured_outputt[T](prompt: str, response_model: type[T]) -
     )
     if response.parsed is None:
         raise StructuredOutputError(
-            schema_name=response_model.__name__, raw_response=response.text
+            schema_name=response_model.__name__,
+            raw_response=response.text,
         )
     return response.parsed
