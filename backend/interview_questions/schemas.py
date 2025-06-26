@@ -6,21 +6,20 @@ class InterviewQuestionsRequest(BaseModel):
 
     job_role: str = Field(
         ...,
-        min_length=1,
         description="The role for which interview questions are being generated.",
-        example="Frontend Developer",
+        examples=["Frontend Developer"],
     )
     experience_level: str = Field(
         ...,
-        min_length=1,
         description="The experience level of the candidate.",
-        example="Mid",
+        examples=["Mid"],
     )
     job_description: str = Field(
         ...,
-        min_length=1,
         description="The detailed job description for the role.",
-        example="Develop and maintain scalable web applications using React and TypeScript.",
+        examples=[
+            "Develop and maintain scalable web applications using React and TypeScript."
+        ],
     )
 
 

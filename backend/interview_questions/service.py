@@ -1,6 +1,6 @@
 import re
 
-from backend.core.llm import generate_text
+from backend.core.gemini import generate_text
 from backend.interview_questions.prompts import INTERVIEW_QUESTION_PROMPT
 
 
