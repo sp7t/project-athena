@@ -6,6 +6,7 @@ from backend.email_generator.schemas import (
 )
 from backend.email_generator.service import generate_email
 
+# Initialize the router with prefix and tags
 router = APIRouter(
     prefix="/email-generator",
     tags=["Email Generator"],
