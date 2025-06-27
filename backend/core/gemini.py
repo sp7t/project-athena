@@ -31,7 +31,7 @@ async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
         },
     )
 
-    if not response.parsed:
+    if response.parsed is None:
         raise StructuredOutputError(
             schema_name=response_model.__name__, raw_response=response.text
         )
