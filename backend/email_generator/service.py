@@ -1,4 +1,4 @@
-from backend.core.gemini import generate_structured_output
+from backend.core.gemini import generate_text
 from backend.email_generator.prompts import EMAIL_GENERATION_PROMPT
 from backend.email_generator.schemas import (
     EmailGenerationRequest,
@@ -17,4 +17,5 @@ async def generate_email(request: EmailGenerationRequest) -> EmailGenerationResp
         rejection_reason=request.rejection_reason,
         notes=request.notes,
     )
-    return await generate_structured_output(prompt, EmailGenerationResponse)
+    generated_email = await generate_text(prompt)
+    return EmailGenerationResponse(generated_email=generated_email)
