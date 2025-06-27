@@ -33,4 +33,4 @@ class JobDescriptionResponse(BaseModel):
     )
 
 
-JobDescriptionResult = JobDescriptionResponse | LLMErrorResponse
+JobDescriptionLLMResponse = JobDescriptionResponse | LLMErrorResponse

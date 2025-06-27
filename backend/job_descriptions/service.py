@@ -5,8 +5,8 @@ from backend.job_descriptions.exceptions import (
     InvalidJobRequirementsError,
 )
 from backend.job_descriptions.schemas import (
+    JobDescriptionLLMResponse,
     JobDescriptionResponse,
-    JobDescriptionResult,
 )
 
 
@@ -25,7 +25,7 @@ async def generate_job_description(
     )
 
     response = await generate_structured_output(
-        prompt=prompt, response_model=JobDescriptionResult
+        prompt=prompt, response_model=JobDescriptionLLMResponse
     )
 
     if isinstance(response, LLMErrorResponse):
