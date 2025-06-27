@@ -1,7 +1,9 @@
 from backend.core.gemini import generate_structured_output
 from backend.core.schemas import LLMErrorResponse
 from backend.job_descriptions.constants import JOB_DESCRIPTION_PROMPT
-from backend.job_descriptions.exceptions import InvalidJobRequirementsError
+from backend.job_descriptions.exceptions import (
+    InvalidJobRequirementsError,
+)
 from backend.job_descriptions.schemas import (
     JobDescriptionResponse,
     JobDescriptionResult,
