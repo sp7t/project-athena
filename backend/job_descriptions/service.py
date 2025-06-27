@@ -16,7 +16,21 @@ async def generate_job_description(
     key_focus: str,
     benefits: str | None,
 ) -> JobDescriptionResponse:
-    """Generate a job description using Gemini with structured schema validation."""
+    """
+    Generates a structured job description using Gemini based on the provided job title, custom note, key focus, and optional benefits.
+    
+    Parameters:
+        job_title (str): The title of the job position.
+        custom_note (str): Additional notes or context to include in the job description.
+        key_focus (str): The main focus or requirements for the job.
+        benefits (str | None): Optional benefits to highlight in the job description.
+    
+    Returns:
+        JobDescriptionResponse: A validated structured response containing the generated job description.
+    
+    Raises:
+        InvalidJobRequirementsError: If the language model returns an error response.
+    """
     prompt = JOB_DESCRIPTION_PROMPT.format(
         job_title=job_title,
         custom_note=custom_note,
