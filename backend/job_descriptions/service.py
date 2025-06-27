@@ -4,7 +4,10 @@ from backend.job_descriptions.constants import JOB_DESCRIPTION_PROMPT
 from backend.job_descriptions.exceptions import (
     InvalidJobRequirementsError,
 )
-from backend.job_descriptions.schemas import JobDescriptionResult
+from backend.job_descriptions.schemas import (
+    JobDescriptionResponse,
+    JobDescriptionResult,
+)
 
 
 async def generate_job_description(
@@ -12,7 +15,7 @@ async def generate_job_description(
     custom_note: str,
     key_focus: str,
     benefits: str | None,
-) -> str:
+) -> JobDescriptionResponse:
     """Generate a job description using Gemini with structured schema validation."""
     prompt = JOB_DESCRIPTION_PROMPT.format(
         job_title=job_title,
