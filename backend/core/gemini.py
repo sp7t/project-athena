@@ -17,7 +17,7 @@ async def generate_text(prompt: str) -> str:
         model=settings.gemini_model,
         contents=[prompt],
     )
-    return response.text
+    return response.text or ""
 
 
 async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
@@ -33,7 +33,7 @@ async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
 
     if response.parsed is None:
         raise StructuredOutputError(
-            schema_name=response_model.__name__, raw_response=response.text
+            schema_name=response_model.__name__, raw_response=response.text or ""
         )
 
-    return response.parsed
+    return response_model.parse_obj(response.parsed)
