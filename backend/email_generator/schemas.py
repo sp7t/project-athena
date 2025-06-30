@@ -1,14 +1,10 @@
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SkillsValidationError(ValueError):
-    """Exception raised when no skills are provided for a candidate."""
-
-    def __init__(self) -> None:
-        """Initialize the SkillsValidationError with a default message."""
-        super().__init__("At least one skill must be provided.")
+    """Raised when the skills list is empty or invalid."""
 
 
 class CandidateInfo(BaseModel):
@@ -22,23 +18,16 @@ class CandidateInfo(BaseModel):
     experience: str = Field(..., description="Candidate's experience summary.")
     title: str = Field(..., description="Job title the candidate applied for.")
 
-    @field_validator("skills")
-    def skills_must_have_at_least_one(cls, v: list[str]) -> list[str]:  # noqa: N805
-        """Ensure that the skills list contains at least one skill."""
-        if not v or len(v) < 1:
-            raise SkillsValidationError
-        return v
 
-
-class EmailRequest(BaseModel):
+class EmailGenerationRequest(BaseModel):
     """Schema representing an email generation request."""
 
-    candidate: CandidateInfo = Field(..., description="Details of the candidate.")
+    candidate: CandidateInfo = Field(description="Details of the candidate.")
     verdict: Literal["Yes", "No"] = Field(
         ..., description='Final decision: "Yes" for selected, "No" for rejected.'
     )
     rejection_reason: str | None = Field(
-        None, description="Reason for rejection, if applicable."
+        None, description="Reason for pass or rejection, if applicable."
     )
     notes: str | None = Field(
         None, description="Additional notes to include in the email."
@@ -48,4 +37,4 @@ class EmailRequest(BaseModel):
 class EmailGenerationResponse(BaseModel):
     """Response model for a generated email."""
 
-    generated_email: str = Field(..., description="The generated email content.")
+    generated_email: str = Field(description="The generated email content.")

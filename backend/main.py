@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from backend.email_generator.router import router as email_generator_router
-from backend.exceptions import APIException  # from develop branch
+from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
 from backend.resume_evaluations.router import router as resume_evaluations_router
 
