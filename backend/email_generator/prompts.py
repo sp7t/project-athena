@@ -1,5 +1,5 @@
 EMAIL_GENERATION_PROMPT = """
-You are an HR recruiter at Athena.7t. Generate a professional email to communicate the candidate's screening result.
+You are an HR recruiter at a small-size tech company. Generate a professional email to communicate the candidate's screening result.
 
 Candidate Details:
 - Name: {name}

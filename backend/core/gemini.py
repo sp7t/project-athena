@@ -6,15 +6,12 @@ from pydantic import BaseModel
 from backend.config import settings
 from backend.core.exceptions import StructuredOutputError
 
-# Initialize Gemini client
 client = genai.Client(api_key=settings.gemini_api_key)
-
-# Generic type variable for Pydantic models
 T = TypeVar("T", bound=BaseModel)
 
 
 async def generate_text(prompt: str) -> str:
-    """Generate plain text using the specified Gemini model."""
+    """Generate text using the specified Gemini model."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=[prompt],
@@ -22,20 +19,8 @@ async def generate_text(prompt: str) -> str:
     return response.text
 
 
-async def generate_structured_output[T](prompt: str, response_model: type[T]) -> T:
-    """Generate structured output using Gemini and validate with a Pydantic schema.
-
-    Args:
-        prompt (str): Prompt to send to Gemini.
-        response_model (type[T]): Pydantic model to validate the Gemini response.
-
-    Returns:
-        T: Parsed and validated response object.
-
-    Raises:
-        StructuredOutputError: If the response cannot be parsed to the schema.
-
-    """
+async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
+    """Generate structured output using the specified Gemini model and Pydantic schema."""
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
         contents=[prompt],
@@ -44,11 +29,8 @@ async def generate_structured_output[T](prompt: str, response_model: type[T]) ->
             "response_schema": response_model,
         },
     )
-
     if response.parsed is None:
         raise StructuredOutputError(
-            schema_name=response_model.__name__,
-            raw_response=response.text,
+            schema_name=response_model.__name__, raw_response=response.text
         )
-
     return response.parsed
