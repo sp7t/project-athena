@@ -113,7 +113,8 @@ As an intern, you'll often be responsible for identifying and creating issues fo
 2.  **Click the "New issue" button.**
 3.  **Choose the appropriate template** for your issue. We have templates for:
     - **Bug Report**: For reporting unexpected behavior or errors. (Uses `bug.md`)
-    - **Feature Request**: For proposing new features or enhancements. (Uses `feature.md`)
+    - **Feature Request**: For proposing new features or functionality. (Uses `feature.md`)
+    - **Enhancement**: For improvements or optimizations to existing features. (Uses `enhancement.md`)
     - **Documentation**: For tasks related to creating or updating documentation. (Uses `docs.md`)
     - **Chore**: For routine maintenance tasks, refactoring, or other non-feature/bug work. (Uses `chore.md`)
     - **Setup**: For issues related to project setup or environment configuration. (Uses `setup.md`)
