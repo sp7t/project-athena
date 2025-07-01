@@ -23,9 +23,19 @@ class InterviewQuestionsRequest(BaseModel):
     )
 
 
+class Questionanswers(BaseModel):
+    """Response model for generated technical interview questions."""
+
+    question: str = Field(..., description="The question for the interview.")
+    answer: str = Field(..., description="The answer for the interview.")
+
+
 class InterviewQuestionsResponse(BaseModel):
     """Response model for generated interview questions."""
 
-    questions: list[str] = Field(
-        ..., description="The list of generated interview questions."
+    behavioralquestions: list[str] = Field(
+        ..., description="The list of generates behavioral interview questions."
+    )
+    Technicalquestions: list[Questionanswers] = Field(
+        ..., description="The list of   generates  technical interview questions."
     )
