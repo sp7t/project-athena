@@ -1,7 +1,14 @@
 from fastapi import APIRouter
 
-from .schemas import ResumeEvaluationRequest, ResumeEvaluationResponse
-from .service import evaluate_resume
+from backend.resume_evaluations.exceptions import (
+    MissingJobDescriptionError,
+    MissingResumeFileError,
+)
+from backend.resume_evaluations.schemas import (
+    ResumeEvaluationRequest,
+    ResumeEvaluationResponse,
+)
+from backend.resume_evaluations.service import evaluate_resume
 
 router = APIRouter(
     prefix="/resume_evaluations",
@@ -9,20 +16,25 @@ router = APIRouter(
 )
 
 
-@router.post("/evaluate", response_model=ResumeEvaluationResponse)  # noqa: FAST001
-async def evaluate(payload: ResumeEvaluationRequest) -> ResumeEvaluationResponse:
+@router.post("/evaluate")
+async def evaluate(request: ResumeEvaluationRequest) -> ResumeEvaluationResponse:
     """Evaluate a candidate's resume against a job description using Gemini LLM.
 
     This endpoint takes resume text and a job description,
-    passes them to the evaluation service, and returns structured feedback
+    validates them, and returns structured feedback
     including scores and suggestions.
 
     Args:
-        payload (ResumeEvaluationRequest): The input data containing resume and job description.
+        request (ResumeEvaluationRequest): The input data containing resume and job description.
 
     Returns:
         ResumeEvaluationResponse: The evaluation results including scores, verdicts, and feedback.
 
     """
-    result = await evaluate_resume(payload.resume_text, payload.job_description)
-    return ResumeEvaluationResponse(**result)
+    if not request.resume_text.strip():
+        raise MissingResumeFileError
+
+    if not request.job_description.strip():
+        raise MissingJobDescriptionError
+
+    return await evaluate_resume(request)

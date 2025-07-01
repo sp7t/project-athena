@@ -26,13 +26,18 @@ class ResumeEvaluationResponse(BaseModel):
     candidate_name: str  # Full name of the candidate
     estimated_experience_years: float
     verdict: str
-    skills_match: int
-    experience_relevance: int
-    keyword_match: int
-    projects: int
-    education: int
-    formatting: int
-    additional_value: int
+
+    # Each category score is now a float because we scale them
+    skills_match: float
+    experience_relevance: float
+    keyword_match: float
+    projects: float
+    education: float
+    formatting: float
+    additional_value: float
+
+    total_score: float  # Total weighted score (0-100)
+
     summary_feedback: str
     detailed_feedback: DetailedFeedback
     missing_qualifications: list[str]
