@@ -56,7 +56,7 @@ Environment variables are crucial for configuring the application, especially fo
     cp .env.example .env
     ```
 2.  Edit the `.env` file and add your specific configurations:
-    - **Gemini API Key**: You'll need a Gemini API Key for certain features.
+    - **Gemini API Key**: You'll need a Gemini API key for certain features.
       - _Instructions_: Obtain your Gemini API key from [Google AI Studio](https://ai.google.dev/gemini-api/docs/api-key) and add it to your `.env` file.
     - **Other Project Variables**: For other necessary environment variables, please contact your supervisor.
 
@@ -280,19 +280,19 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 
 ### Example Workflow Summary
 
-1.  Developer picks up issue `#101` (e.g., a backend bug).
-2.  Ensures `develop` is up to date: `git checkout develop && git pull origin develop`.
+1.  Pick up issue `#101` (e.g., a backend bug).
+2.  Ensure `develop` is up to date: `git checkout develop && git pull origin develop`.
     > **💡 GUI Alternative**: Click branch name → select `develop` → click sync icon
-3.  Creates a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
+3.  Create a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
     > **💡 GUI Alternative**: Click branch name → "Create new branch from..." → choose `develop`
-4.  Makes changes, commits them using Conventional Commits.
-    > **💡 GUI Alternative**: Use Source Control panel to stage changes and write commit messages
-5.  (If `develop` has new commits) Rebases branch: `git rebase origin/develop`.
+4.  Make changes, commit them using Conventional Commits.
+    > **💡 GUI Alternative**: Use Source Control panel to stage changes and write commit messages. Use "Conventional Commits" extension to help write commits.
+5.  (If `develop` has new commits) Rebase branch: `git rebase origin/develop`.
     > **💡 GUI Alternative**: Command Palette → "Git: Rebase Branch" → select `origin/develop`
-6.  Pushes branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
+6.  Push branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
     > **💡 GUI Alternative**: Use sync button and choose "Force Push" when prompted
-7.  Opens a PR against `develop`.
-8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
+7.  Open a PR against `develop`.
+8.  Add `backend` label, link issue with `Closes #101` in the PR description.
 9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
 11. Delete the feature branch locally and remotely to keep the repository clean:
@@ -389,7 +389,7 @@ To give you a clearer picture, here's a typical file structure you'll encounter 
 
 ```
 backend/
-├── main.py             # FastAPI app entry point, global configurations, includes module routers. Connects all the pieces.
+├── main.py             # FastAPI app entry point with global configurations that includes module routers and connects all the pieces.
 ├── config.py           # Application-wide settings (e.g., environment variables, external service URLs).
 ├── database.py         # Database connection setup, session management, and potentially base ORM configurations.
 │
