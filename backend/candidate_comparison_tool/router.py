@@ -1,11 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from backend.candidate_comparison_tool.schemas import (
     CandidateComparisonLLMResponse,
     CandidateComparisonRequest,
 )
 from backend.candidate_comparison_tool.service import compare_candidates
-from backend.resume_evaluations.exceptions import ResumeEvaluationError
 
 router = APIRouter(
     prefix="/candidate-comparisons",
@@ -15,17 +14,13 @@ router = APIRouter(
 
 @router.post(
     "/compare",
+    status_code=200,
 )
-async def compare_candidates_route(
+async def compare(
     payload: CandidateComparisonRequest,
 ) -> CandidateComparisonLLMResponse:
-    """Compare multiple resumes by reusing resume evaluation."""
-    try:
-        result = await compare_candidates(
-            job_description=payload.job_description,
-            resumes=payload.resumes,
-        )
-    except ResumeEvaluationError as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-    else:
-        return result
+    """Compare multiple resumes against a job description and return a summary."""
+    return await compare_candidates(
+        job_description=payload.job_description,
+        resumes=payload.resumes,
+    )
