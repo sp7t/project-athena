@@ -15,6 +15,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "requests>=2.32.3",
     "streamlit>=1.44.1",
+    "streamlit-lottie>=0.0.5",
     "supabase>=2.15.0",
 ]
 
