@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.concurrency import run_in_threadpool
 
-from backend.candidate_comparison_tool.exceptions import GeminiError
 from backend.candidate_comparison_tool.schemas import (
     CandidateComparisonLLMResponse,
     CandidateComparisonRequest,
 )
-from backend.candidate_comparison_tool.service import get_gemini_score
+from backend.candidate_comparison_tool.service import compare_candidates
+from backend.resume_evaluations.exceptions import ResumeEvaluationError
 
 router = APIRouter(
     prefix="/candidate-comparisons",
@@ -16,15 +15,17 @@ router = APIRouter(
 
 @router.post(
     "/compare",
-    status_code=200,
 )
-async def compare_candidates(
-    data: CandidateComparisonRequest,
+async def compare_candidates_route(
+    payload: CandidateComparisonRequest,
 ) -> CandidateComparisonLLMResponse:
-    """Compare multiple resumes against a job description and return a summary."""
+    """Compare multiple resumes by reusing resume evaluation."""
     try:
-        return await run_in_threadpool(
-            get_gemini_score, data.job_description, data.resumes
+        result = await compare_candidates(
+            job_description=payload.job_description,
+            resumes=payload.resumes,
         )
-    except GeminiError as ge:
-        raise HTTPException(status_code=503, detail=str(ge)) from ge
+    except ResumeEvaluationError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    else:
+        return result
