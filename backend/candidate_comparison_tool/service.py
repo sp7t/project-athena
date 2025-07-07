@@ -1,12 +1,15 @@
-from typing import Any
-
-from backend.resume_evaluations.schemas import ResumeEvaluationRequest
 from backend.resume_evaluations.service import evaluate_resume
+
+from .schemas import (
+    CandidateComparisonLLMResponse,
+    CandidateResult,
+    ResumeEvaluationRequest,
+)
 
 
 async def compare_candidates(
     job_description: str, resumes: list[str]
-) -> dict[str, Any]:
+) -> CandidateComparisonLLMResponse:
     """Compare multiple resumes by reusing the resume evaluation service."""
     candidates = []
 
@@ -15,12 +18,12 @@ async def compare_candidates(
             resume_text=resume_text,
             job_description=job_description,
         )
-
         score = await evaluate_resume(request)
+
         candidates.append(
             {
                 "name": f"Candidate {i}",
-                "score": score.model_dump(),  # ensure dict output
+                "score": score.model_dump(),
             }
         )
 
@@ -28,7 +31,7 @@ async def compare_candidates(
         f"Compared {len(candidates)} candidates. Add custom logic for ranking."
     )
 
-    return {
-        "candidates": candidates,
-        "comparison_summary": comparison_summary,
-    }
+    return CandidateComparisonLLMResponse(
+        candidates=[CandidateResult(**c) for c in candidates],
+        comparison_summary=comparison_summary,
+    )

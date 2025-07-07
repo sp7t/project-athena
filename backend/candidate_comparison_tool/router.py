@@ -15,6 +15,7 @@ router = APIRouter(
 @router.post(
     "/compare",
     status_code=200,
+    response_model=CandidateComparisonLLMResponse,
 )
 async def compare(
     payload: CandidateComparisonRequest,
