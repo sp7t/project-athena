@@ -1,15 +1,14 @@
-from backend.resume_evaluations.service import evaluate_resume
-
-from .schemas import (
-    CandidateComparisonLLMResponse,
+from backend.candidate_comparison_tool.schemas import (
+    CandidateComparisonResponse,  # <-- fix
     CandidateResult,
-    ResumeEvaluationRequest,
 )
+from backend.resume_evaluations.schemas import ResumeEvaluationRequest
+from backend.resume_evaluations.service import evaluate_resume
 
 
 async def compare_candidates(
     job_description: str, resumes: list[str]
-) -> CandidateComparisonLLMResponse:
+) -> CandidateComparisonResponse:
     """Compare multiple resumes by reusing the resume evaluation service."""
     candidates = []
 
@@ -31,7 +30,7 @@ async def compare_candidates(
         f"Compared {len(candidates)} candidates. Add custom logic for ranking."
     )
 
-    return CandidateComparisonLLMResponse(
+    return CandidateComparisonResponse(
         candidates=[CandidateResult(**c) for c in candidates],
         comparison_summary=comparison_summary,
     )
