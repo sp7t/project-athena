@@ -7,7 +7,6 @@ from backend.config import settings
 from backend.core.exceptions import StructuredOutputError
 
 client = genai.Client(api_key=settings.gemini_api_key)
-
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -30,10 +29,8 @@ async def generate_structured_output(prompt: str, response_model: type[T]) -> T:
             "response_schema": response_model,
         },
     )
-
     if response.parsed is None:
         raise StructuredOutputError(
             schema_name=response_model.__name__, raw_response=response.text
         )
-
     return response.parsed

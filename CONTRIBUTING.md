@@ -226,7 +226,11 @@ To maintain a clean and linear project history, we prefer rebasing your feature 
     git fetch origin develop
     ```
 
+
+    > **💡 GUI Alternative**: In VSCode, use the Source Control panel and click the refresh icon, or use the sync button in the status bar.
+
     > **💡 GUI Alternative**: In VS Code, use the Source Control panel and click the refresh icon, or use the sync button in the status bar.
+
 
 2.  **Rebase your feature branch**:
 
@@ -235,7 +239,11 @@ To maintain a clean and linear project history, we prefer rebasing your feature 
     git rebase origin/develop
     ```
 
+
+    > **💡 GUI Alternative**: In VSCode, ensure you're on your feature branch, then open the Command Palette (Ctrl/Cmd+Shift+P), type "Git: Rebase Branch" and select `origin/develop` as the target.
+
     > **💡 GUI Alternative**: In VS Code, ensure you're on your feature branch, then open the Command Palette (Ctrl/Cmd+Shift+P), type "Git: Rebase Branch" and select `origin/develop` as the target.
+
 
 3.  **Resolve conflicts**: If there are merge conflicts, Git will pause the rebase and ask you to resolve them. After resolving conflicts, continue the rebase:
 
@@ -244,7 +252,11 @@ To maintain a clean and linear project history, we prefer rebasing your feature 
     git rebase --continue
     ```
 
+
+    > **💡 GUI Alternative**: VSCode will show conflict markers in your files. Resolve conflicts using the inline conflict resolution tools, then use the Source Control panel to stage changes and continue the rebase.
+
     > **💡 GUI Alternative**: VS Code will show conflict markers in your files. Resolve conflicts using the inline conflict resolution tools, then use the Source Control panel to stage changes and continue the rebase.
+
 
 4.  **Force push (with lease)**: After a successful rebase, you'll need to force push your branch. Use `git push --force-with-lease` to avoid accidentally overwriting work if someone else has pushed to the branch.
 
@@ -252,7 +264,11 @@ To maintain a clean and linear project history, we prefer rebasing your feature 
     git push origin your-feature-branch --force-with-lease --force-if-includes
     ```
 
+
+    > **💡 GUI Alternative**: In VSCode, after rebasing, the Source Control panel will show that your branch has diverged. Click the sync button and choose "Force Push" when prompted.
+
     > **💡 GUI Alternative**: In VS Code, after rebasing, the Source Control panel will show that your branch has diverged. Click the sync button and choose "Force Push" when prompted.
+
 
     _Why rebase?_ Rebasing helps keep the commit history clean by placing your feature branch commits on top of the latest `develop` branch, avoiding unnecessary merge commits.
 
@@ -280,6 +296,21 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 
 ### Example Workflow Summary
 
+
+1.  Developer picks up issue `#101` (e.g., a backend bug).
+2.  Ensures `develop` is up to date: `git checkout develop && git pull origin develop`.
+    > **💡 GUI Alternative**: Click branch name → select `develop` → click sync icon
+3.  Creates a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
+    > **💡 GUI Alternative**: Click branch name → "Create new branch from..." → choose `develop`
+4.  Makes changes, commits them using Conventional Commits.
+    > **💡 GUI Alternative**: Use Source Control panel to stage changes and write commit messages
+5.  (If `develop` has new commits) Rebases branch: `git rebase origin/develop`.
+    > **💡 GUI Alternative**: Command Palette → "Git: Rebase Branch" → select `origin/develop`
+6.  Pushes branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
+    > **💡 GUI Alternative**: Use sync button and choose "Force Push" when prompted
+7.  Opens a PR against `develop`.
+8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
+
 1.  Pick up issue `#101` (e.g., a backend bug).
 2.  Ensure `develop` is up to date: `git checkout develop && git pull origin develop`.
     > **💡 GUI Alternative**: Click branch name → select `develop` → click sync icon
@@ -293,6 +324,7 @@ Once your changes are ready and you've pushed them to your feature branch on Git
     > **💡 GUI Alternative**: Use sync button and choose "Force Push" when prompted
 7.  Open a PR against `develop`.
 8.  Add `backend` label, link issue with `Closes #101` in the PR description.
+
 9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
 11. Delete the feature branch locally and remotely to keep the repository clean:
