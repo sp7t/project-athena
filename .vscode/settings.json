@@ -15,5 +15,13 @@
   ],
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
-  }
+  },
+  "git.allowForcePush": true,
+  "git.useForcePushWithLease": true,
+  "git.rebaseWhenSync": true,
+  "git.autoStash": true,
+  "git.confirmSync": true,
+  "git.useForcePushIfIncludes": true,
+  "git.confirmForcePush": true,
+  "git.mergeEditor": true
 }
