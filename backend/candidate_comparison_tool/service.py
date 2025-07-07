@@ -1,5 +1,5 @@
 from backend.candidate_comparison_tool.schemas import (
-    CandidateComparisonResponse,  # <-- fix
+    CandidateComparisonResponse,
     CandidateResult,
 )
 from backend.resume_evaluations.schemas import ResumeEvaluationRequest
@@ -11,26 +11,31 @@ async def compare_candidates(
 ) -> CandidateComparisonResponse:
     """Compare multiple resumes by reusing the resume evaluation service."""
     candidates = []
+    failed_evaluations = []
 
     for i, resume_text in enumerate(resumes, start=1):
-        request = ResumeEvaluationRequest(
-            resume_text=resume_text,
-            job_description=job_description,
-        )
-        score = await evaluate_resume(request)
+        try:
+            request = ResumeEvaluationRequest(
+                resume_text=resume_text,
+                job_description=job_description,
+            )
+            score = await evaluate_resume(request)
 
-        candidates.append(
-            {
-                "name": f"Candidate {i}",
-                "score": score.model_dump(),
-            }
-        )
+            candidates.append(
+                CandidateResult(
+                    name=f"Candidate {i}",
+                    score=score.model_dump(),
+                )
+            )
+        except ValueError as e:
+            failed_evaluations.append(f"Candidate {i}: {e!s}")
 
-    comparison_summary = (
-        f"Compared {len(candidates)} candidates. Add custom logic for ranking."
-    )
+    candidates.sort(key=lambda c: c.score.get("score", 0), reverse=True)
+    comparison_summary = f"Successfully compared {len(candidates)} candidates."
+    if failed_evaluations:
+        comparison_summary += f" ({len(failed_evaluations)} failed)"
 
     return CandidateComparisonResponse(
-        candidates=[CandidateResult(**c) for c in candidates],
+        candidates=candidates,
         comparison_summary=comparison_summary,
     )
