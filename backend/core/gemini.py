@@ -15,7 +15,7 @@ client = genai.Client(api_key=settings.gemini_api_key)
 T = TypeVar("T", bound=BaseModel)
 
 
-def _validate_total_request_size(
+async def _validate_total_request_size(
     prompt: str, files: list[FileInput] | None = None
 ) -> None:
     """Validate that the total request size doesn't exceed the limit.
@@ -31,7 +31,11 @@ def _validate_total_request_size(
     total_size = len(prompt.encode("utf-8"))  # Size of prompt in bytes
 
     if files:
-        total_size += sum(len(f.get_file_bytes()) for f in files)
+        file_sizes = []
+        for f in files:
+            file_bytes = await f.get_file_bytes_async()
+            file_sizes.append(len(file_bytes))
+        total_size += sum(file_sizes)
 
     if total_size > GEMINI_MAX_TOTAL_REQUEST_SIZE:
         raise TotalRequestSizeExceededError(
@@ -51,15 +55,18 @@ async def generate_text(prompt: str, files: list[FileInput] | None = None) -> st
         str: The generated text
 
     """
-    _validate_total_request_size(prompt, files)
+    await _validate_total_request_size(prompt, files)
 
     contents = []
 
     if files:
-        contents.extend(
-            types.Part.from_bytes(data=f.get_file_bytes(), mime_type=f.mime_type.value)
-            for f in files
-        )
+        file_parts = []
+        for f in files:
+            file_bytes = await f.get_file_bytes_async()
+            file_parts.append(
+                types.Part.from_bytes(data=file_bytes, mime_type=f.mime_type.value)
+            )
+        contents.extend(file_parts)
 
     contents.append(prompt)
 
@@ -87,15 +94,18 @@ async def generate_structured_output(
         T: The parsed structured output
 
     """
-    _validate_total_request_size(prompt, files)
+    await _validate_total_request_size(prompt, files)
 
     contents = []
 
     if files:
-        contents.extend(
-            types.Part.from_bytes(data=f.get_file_bytes(), mime_type=f.mime_type.value)
-            for f in files
-        )
+        file_parts = []
+        for f in files:
+            file_bytes = await f.get_file_bytes_async()
+            file_parts.append(
+                types.Part.from_bytes(data=file_bytes, mime_type=f.mime_type.value)
+            )
+        contents.extend(file_parts)
 
     contents.append(prompt)
 

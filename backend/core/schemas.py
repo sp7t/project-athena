@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 from pathlib import Path
 
@@ -73,6 +74,24 @@ class FileInput(BaseModel):
             try:
                 file_path = Path(self.data)
                 return file_path.read_bytes()
+            except FileNotFoundError as e:
+                msg = f"File not found: {self.data}"
+                raise FileNotFoundError(msg) from e
+            except PermissionError as e:
+                msg = f"Permission denied reading file: {self.data}"
+                raise PermissionError(msg) from e
+        msg = f"Unsupported file data type: {type(self.data)}"
+        raise TypeError(msg)
+
+    async def get_file_bytes_async(self) -> bytes:
+        """Get file content as bytes asynchronously."""
+        if isinstance(self.data, bytes):
+            return self.data
+        if isinstance(self.data, (Path, str)):
+            try:
+                file_path = Path(self.data)
+                # Use asyncio.to_thread for async file reading
+                return await asyncio.to_thread(file_path.read_bytes)
             except FileNotFoundError as e:
                 msg = f"File not found: {self.data}"
                 raise FileNotFoundError(msg) from e
