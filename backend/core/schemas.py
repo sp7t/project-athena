@@ -90,7 +90,6 @@ class FileInput(BaseModel):
         if isinstance(self.data, (Path, str)):
             try:
                 file_path = Path(self.data)
-                # Use asyncio.to_thread for async file reading
                 return await asyncio.to_thread(file_path.read_bytes)
             except FileNotFoundError as e:
                 msg = f"File not found: {self.data}"
