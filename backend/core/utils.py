@@ -12,7 +12,7 @@ def revalidate_instance(instance: T) -> None:
         instance: Any Pydantic model instance
 
     Raises:
-        ValidationError: If the current field values don't pass validation
+        pydantic.ValidationError: If the current field values don't pass validation
 
     """
     # Get the model class
