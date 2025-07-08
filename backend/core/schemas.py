@@ -1,7 +1,10 @@
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from backend.core.constants import GEMINI_MAX_FILE_SIZE
+from backend.core.exceptions import FileSizeExceededError
 
 
 class LLMErrorResponse(BaseModel):
@@ -38,11 +41,47 @@ class FileInput(BaseModel):
     )
     mime_type: MimeType = Field(description="MIME type of the file")
 
+    @field_validator("data")
+    @classmethod
+    def validate_file_size(
+        cls,
+        v: bytes | Path | str,
+    ) -> bytes | Path | str:
+        """Validate file size doesn't exceed maximum."""
+        if isinstance(v, bytes):
+            file_size = len(v)
+        elif isinstance(v, (Path, str)):
+            file_path = Path(v)
+            if not file_path.exists():
+                msg = f"File not found: {file_path}"
+                raise ValueError(msg)
+            file_size = file_path.stat().st_size
+        else:
+            msg = f"Unsupported file data type: {type(v)}"
+            raise TypeError(msg)
+
+        if file_size > GEMINI_MAX_FILE_SIZE:
+            raise FileSizeExceededError(file_size, GEMINI_MAX_FILE_SIZE)
+
+        return v
+
     def get_file_bytes(self) -> bytes:
         """Get file content as bytes."""
         if isinstance(self.data, bytes):
             return self.data
         if isinstance(self.data, (Path, str)):
-            return Path(self.data).read_bytes()
+            try:
+                file_path = Path(self.data)
+                file_size = file_path.stat().st_size
+                if file_size > 50 * 1024 * 1024:  # 50MB limit
+                    msg = f"File too large: {file_size} bytes"
+                    raise ValueError(msg)
+                return file_path.read_bytes()
+            except FileNotFoundError as e:
+                msg = f"File not found: {self.data}"
+                raise FileNotFoundError(msg) from e
+            except PermissionError as e:
+                msg = f"Permission denied reading file: {self.data}"
+                raise PermissionError(msg) from e
         msg = f"Unsupported file data type: {type(self.data)}"
         raise TypeError(msg)
