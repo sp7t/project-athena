@@ -34,7 +34,10 @@ def _validate_total_request_size(
         total_size += sum(len(f.get_file_bytes()) for f in files)
 
     if total_size > GEMINI_MAX_TOTAL_REQUEST_SIZE:
-        raise TotalRequestSizeExceededError(total_size, GEMINI_MAX_TOTAL_REQUEST_SIZE)
+        raise TotalRequestSizeExceededError(
+            total_size=total_size,
+            max_size=GEMINI_MAX_TOTAL_REQUEST_SIZE,
+        )
 
 
 async def generate_text(prompt: str, files: list[FileInput] | None = None) -> str:
