@@ -1,11 +1,7 @@
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, Field, field_validator
-from pydantic.fields import FieldInfo
-
-from backend.core.constants import GEMINI_MAX_FILE_SIZE
-from backend.core.exceptions import FileSizeExceededError
+from pydantic import BaseModel, Field
 
 
 class LLMErrorResponse(BaseModel):
@@ -41,34 +37,6 @@ class FileInput(BaseModel):
         description="File data as bytes, Path object, or file path string"
     )
     mime_type: MimeType = Field(description="MIME type of the file")
-    max_size: int = Field(
-        default=GEMINI_MAX_FILE_SIZE, description="Maximum file size in bytes"
-    )
-
-    @field_validator("data")
-    @classmethod
-    def validate_file_size(
-        cls, v: bytes | Path | str, info: FieldInfo
-    ) -> bytes | Path | str:
-        """Validate file size doesn't exceed maximum."""
-        max_size = info.data.get("max_size")
-
-        if isinstance(v, bytes):
-            file_size = len(v)
-        elif isinstance(v, (Path, str)):
-            file_path = Path(v)
-            if not file_path.exists():
-                msg = f"File not found: {file_path}"
-                raise ValueError(msg)
-            file_size = file_path.stat().st_size
-        else:
-            msg = f"Unsupported file data type: {type(v)}"
-            raise TypeError(msg)
-
-        if file_size > max_size:
-            raise FileSizeExceededError(file_size, max_size)
-
-        return v
 
     def get_file_bytes(self) -> bytes:
         """Get file content as bytes."""

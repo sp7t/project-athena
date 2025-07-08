@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_key: str | None = None
 
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent / ".env",
