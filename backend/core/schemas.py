@@ -72,10 +72,6 @@ class FileInput(BaseModel):
         if isinstance(self.data, (Path, str)):
             try:
                 file_path = Path(self.data)
-                file_size = file_path.stat().st_size
-                if file_size > 50 * 1024 * 1024:  # 50MB limit
-                    msg = f"File too large: {file_size} bytes"
-                    raise ValueError(msg)
                 return file_path.read_bytes()
             except FileNotFoundError as e:
                 msg = f"File not found: {self.data}"
