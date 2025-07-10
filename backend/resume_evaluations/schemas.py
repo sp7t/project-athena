@@ -1,44 +1,45 @@
-from pydantic import BaseModel
+from enum import Enum
+
+from pydantic import BaseModel, Field
 
 
-class DetailedFeedback(BaseModel):
-    """Individual field-level feedback for each scoring category."""
+class EvaluationVerdict(str, Enum):
+    """Possible evaluation verdicts for resume assessment."""
 
-    skills_match_feedback: str
-    experience_relevance_feedback: str
-    keyword_match_feedback: str
-    projects_feedback: str
-    education_feedback: str
-    formatting_feedback: str
-    additional_value_feedback: str
+    STRONG_MATCH = "Strong Match"
+    GOOD_MATCH = "Good Match"
+    PARTIAL_MATCH = "Partial Match"
+    WEAK_MATCH = "Weak Match"
+    NOT_RECOMMENDED = "Not Recommended"
 
 
-class ResumeEvaluationRequest(BaseModel):
-    """Request payload for resume evaluation."""
+class EvaluationCategory(BaseModel):
+    """Score and feedback for a single evaluation category."""
 
-    resume_text: str
-    job_description: str
+    score: float = Field(ge=0, le=100, description="...")
+    feedback: str = Field(description="...")
 
 
-class ResumeEvaluationResponse(BaseModel):
+class BaseResumeEvaluation(BaseModel):
+    """Base schema for resume evaluation."""
+
+    name: str = Field(description="...")
+    experience_years: float = Field(description="...")
+    verdict: EvaluationVerdict = Field(description="...")
+    # Category evaluations
+    skills: EvaluationCategory = Field(description="...")
+    experience: EvaluationCategory = Field(description="...")
+    keywords: EvaluationCategory = Field(description="...")
+    projects: EvaluationCategory = Field(description="...")
+    education: EvaluationCategory = Field(description="...")
+    presentation: EvaluationCategory = Field(description="...")
+    extras: EvaluationCategory = Field(description="...")
+    summary: str = Field(description="...")
+    missing_requirements: list[str] = Field(description="...")
+    recommendations: list[str] = Field(description="...")
+
+
+class ResumeEvaluationResponse(BaseResumeEvaluation):
     """Full JSON response from the resume-evaluation service."""
 
-    candidate_name: str  # Full name of the candidate
-    estimated_experience_years: float
-    verdict: str
-
-    # Each category score is now a float because we scale them
-    skills_match: float
-    experience_relevance: float
-    keyword_match: float
-    projects: float
-    education: float
-    formatting: float
-    additional_value: float
-
-    total_score: float  # Total weighted score (0-100)
-
-    summary_feedback: str
-    detailed_feedback: DetailedFeedback
-    missing_qualifications: list[str]
-    improvement_suggestions: list[str]
+    overall_score: float = Field(ge=0, le=100, description="...")
