@@ -1,65 +1,61 @@
+from fastapi import UploadFile
+
 from backend.core.gemini import generate_structured_output
+from backend.core.schemas import FileInput, MimeType
 from backend.resume_evaluations.constants import RESUME_EVAL_PROMPT
 from backend.resume_evaluations.schemas import (
-    ResumeEvaluationRequest,
+    BaseResumeEvaluation,
     ResumeEvaluationResponse,
 )
 
+# Category weights for total score calculation
+CATEGORY_WEIGHTS = {
+    "skills": 0.30,
+    "experience": 0.20,
+    "keywords": 0.15,
+    "projects": 0.15,
+    "education": 0.10,
+    "presentation": 0.05,
+    "extras": 0.05,
+}
 
-async def evaluate_resume(request: ResumeEvaluationRequest) -> ResumeEvaluationResponse:
-    """Evaluate resume using Gemini structured output and return scaled scores with total."""
+
+def calculate_weighted_score(response: BaseResumeEvaluation) -> float:
+    """Calculate weighted total score from category scores."""
+    total = (
+        response.skills.score * CATEGORY_WEIGHTS["skills"]
+        + response.experience.score * CATEGORY_WEIGHTS["experience"]
+        + response.keywords.score * CATEGORY_WEIGHTS["keywords"]
+        + response.projects.score * CATEGORY_WEIGHTS["projects"]
+        + response.education.score * CATEGORY_WEIGHTS["education"]
+        + response.presentation.score * CATEGORY_WEIGHTS["presentation"]
+        + response.extras.score * CATEGORY_WEIGHTS["extras"]
+    )
+    return round(total, 2)
+
+
+def create_full_response(
+    gemini_response: BaseResumeEvaluation, overall_score: float
+) -> ResumeEvaluationResponse:
+    """Create full response by adding calculated total score to Gemini response."""
+    data = gemini_response.model_dump()
+    data["overall_score"] = overall_score
+    return ResumeEvaluationResponse.model_validate(data)
+
+
+async def evaluate_resume(
+    resume_file: UploadFile, job_description: str
+) -> ResumeEvaluationResponse:
+    """Evaluate resume using Gemini structured output and return response with calculated total score."""
+    resume_content = await resume_file.read()
+    resume_file_input = FileInput(data=resume_content, mime_type=MimeType.PDF)
     prompt = RESUME_EVAL_PROMPT.format(
-        resume_text=request.resume_text,
-        job_description=request.job_description,
+        job_description=job_description,
+    )
+    gemini_response = await generate_structured_output(
+        prompt=prompt, response_model=BaseResumeEvaluation, files=[resume_file_input]
     )
 
-    # Call Gemini and parse
-    result = await generate_structured_output(prompt, ResumeEvaluationResponse)
+    total_score = calculate_weighted_score(gemini_response)
 
-    # Safely ensure all raw scores exist
-    skills_raw = result.skills_match or 0
-    experience_raw = result.experience_relevance or 0
-    keyword_raw = result.keyword_match or 0
-    projects_raw = result.projects or 0
-    education_raw = result.education or 0
-    formatting_raw = result.formatting or 0
-    additional_raw = result.additional_value or 0
-
-    # Scale each score by its weight
-    skills_match = round(skills_raw / 100 * 30, 2)
-    experience_relevance = round(experience_raw / 100 * 20, 2)
-    keyword_match = round(keyword_raw / 100 * 15, 2)
-    projects = round(projects_raw / 100 * 15, 2)
-    education = round(education_raw / 100 * 10, 2)
-    formatting = round(formatting_raw / 100 * 5, 2)
-    additional_value = round(additional_raw / 100 * 5, 2)
-
-    # Final total
-    total_score = round(
-        skills_match
-        + experience_relevance
-        + keyword_match
-        + projects
-        + education
-        + formatting
-        + additional_value,
-        2,
-    )
-
-    return ResumeEvaluationResponse(
-        candidate_name=result.candidate_name,
-        estimated_experience_years=result.estimated_experience_years,
-        verdict=result.verdict,
-        skills_match=skills_match,
-        experience_relevance=experience_relevance,
-        keyword_match=keyword_match,
-        projects=projects,
-        education=education,
-        formatting=formatting,
-        additional_value=additional_value,
-        summary_feedback=result.summary_feedback,
-        detailed_feedback=result.detailed_feedback,
-        missing_qualifications=result.missing_qualifications,
-        improvement_suggestions=result.improvement_suggestions,
-        total_score=total_score,
-    )
+    return create_full_response(gemini_response, total_score)
