@@ -5,6 +5,7 @@ from backend.core.schemas import FileInput, MimeType
 from backend.resume_evaluations.constants import RESUME_EVAL_PROMPT
 from backend.resume_evaluations.schemas import (
     BaseResumeEvaluation,
+    EvaluationVerdict,
     ResumeEvaluationResponse,
 )
 
@@ -18,6 +19,25 @@ CATEGORY_WEIGHTS = {
     "presentation": 0.05,
     "extras": 0.05,
 }
+
+# Verdict score thresholds
+STRONG_MATCH_THRESHOLD = 90
+GOOD_MATCH_THRESHOLD = 80
+PARTIAL_MATCH_THRESHOLD = 65
+WEAK_MATCH_THRESHOLD = 50
+
+
+def derive_verdict(score: float) -> EvaluationVerdict:
+    """Map score to EvaluationVerdict enum."""
+    if score >= STRONG_MATCH_THRESHOLD:
+        return EvaluationVerdict.STRONG_MATCH
+    if score >= GOOD_MATCH_THRESHOLD:
+        return EvaluationVerdict.GOOD_MATCH
+    if score >= PARTIAL_MATCH_THRESHOLD:
+        return EvaluationVerdict.PARTIAL_MATCH
+    if score >= WEAK_MATCH_THRESHOLD:
+        return EvaluationVerdict.WEAK_MATCH
+    return EvaluationVerdict.NOT_RECOMMENDED
 
 
 def calculate_weighted_score(response: BaseResumeEvaluation) -> float:
@@ -37,9 +57,10 @@ def calculate_weighted_score(response: BaseResumeEvaluation) -> float:
 def create_full_response(
     gemini_response: BaseResumeEvaluation, overall_score: float
 ) -> ResumeEvaluationResponse:
-    """Create full response by adding calculated total score to Gemini response."""
+    """Create full response by adding calculated total score and verdict to Gemini response."""
     data = gemini_response.model_dump()
     data["overall_score"] = overall_score
+    data["verdict"] = derive_verdict(overall_score)
     return ResumeEvaluationResponse.model_validate(data)
 
 
@@ -57,5 +78,4 @@ async def evaluate_resume(
     )
 
     total_score = calculate_weighted_score(gemini_response)
-
     return create_full_response(gemini_response, total_score)
