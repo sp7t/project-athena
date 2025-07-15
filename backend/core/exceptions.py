@@ -61,11 +61,3 @@ class TotalRequestSizeExceededError(APIException):
         super().__init__(
             status_code=status_code, detail=detail, debug_context=debug_context
         )
-
-
-class LLMGenerationError(APIException):
-    """Custom exception for errors during LLM text generation."""
-
-    def __init__(self, detail: str, status_code: int = 500) -> None:
-        """Initialize the LLM generation error."""
-        super().__init__(status_code=status_code, detail=detail)
