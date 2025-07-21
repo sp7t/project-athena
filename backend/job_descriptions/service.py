@@ -12,16 +12,18 @@ from backend.job_descriptions.schemas import (
 
 async def generate_job_description(
     job_title: str,
-    custom_note: str,
+    qualifications: str,
     key_focus: str,
     benefits: str | None,
+    custom_note: str | None,
 ) -> JobDescriptionResponse:
     """Generate a job description using Gemini with structured schema validation."""
     prompt = JOB_DESCRIPTION_PROMPT.format(
         job_title=job_title,
-        custom_note=custom_note,
+        qualifications=qualifications,
         key_focus=key_focus,
         benefits=benefits,
+        custom_note=custom_note,
     )
 
     response = await generate_structured_output(
