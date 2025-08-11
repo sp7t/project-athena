@@ -1,25 +1,20 @@
-from typing import TypeVar
+"""Utility functions for the backend core module."""
 
-from pydantic import BaseModel
-
-T = TypeVar("T", bound=BaseModel)
+from pydantic import BaseModel, ValidationError
 
 
-def revalidate_instance(instance: T) -> None:
-    """Re-validate a Pydantic model instance using its current field values.
+def revalidate_instance(instance: BaseModel) -> None:
+    """Revalidate a Pydantic model instance.
 
     Args:
-        instance: Any Pydantic model instance
+        instance: The Pydantic model instance to validate
 
     Raises:
-        pydantic.ValidationError: If the current field values don't pass validation
-
+        ValidationError: If validation fails
     """
-    # Get the model class
-    model_class = instance.__class__
-
-    # Extract current field values
-    current_data = instance.model_dump()
-
-    # Re-validate using the model's validator
-    model_class.model_validate(current_data)
+    try:
+        instance.model_validate(instance.model_dump())
+    except ValidationError as e:
+        raise ValidationError.from_exception_data(
+            title="Validation Error", line_errors=e.errors(), model=instance.__class__
+        )
