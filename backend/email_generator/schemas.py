@@ -26,7 +26,7 @@ class EmailGenerationRequest(BaseModel):
     verdict: Literal["Yes", "No"] = Field(
         ..., description='Final decision: "Yes" for selected, "No" for rejected.'
     )
-    rejection_reason: str | None = Field(
+    reason: str | None = Field(
         None, description="Reason for pass or rejection, if applicable."
     )
     notes: str | None = Field(

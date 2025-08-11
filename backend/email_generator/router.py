@@ -12,12 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/generate",
-    status_code=200,
-    summary="Generate Candidate Email",
-    description="Generate an email response based on the given candidate information and verdict.",
-)
+@router.post("/generate")
 async def generate_email_endpoint(
     request: EmailGenerationRequest,
 ) -> EmailGenerationResponse:
