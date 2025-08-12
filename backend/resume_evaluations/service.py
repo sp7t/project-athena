@@ -1,6 +1,7 @@
 from fastapi import UploadFile
 
 from backend.core.gemini import generate_structured_output
+from backend.core.schemas import FileInput, MimeType
 from backend.resume_evaluations.constants import RESUME_EVAL_PROMPT
 from backend.resume_evaluations.schemas import (
     BaseResumeEvaluation,
@@ -68,18 +69,12 @@ async def evaluate_resume(
 ) -> ResumeEvaluationResponse:
     """Evaluate resume using Gemini structured output and return response with calculated total score."""
     resume_content = await resume_file.read()
-    resume_text = resume_content.decode('utf-8', errors='ignore')
-    
-    # Create a prompt that includes both the resume content and job description
-    full_prompt = f"""
-{RESUME_EVAL_PROMPT}
-
-Resume Content:
-{resume_text}
-"""
-    
+    resume_file_input = FileInput(data=resume_content, mime_type=MimeType.PDF)
+    prompt = RESUME_EVAL_PROMPT.format(
+        job_description=job_description,
+    )
     gemini_response = await generate_structured_output(
-        prompt=full_prompt, response_model=BaseResumeEvaluation
+        prompt=prompt, response_model=BaseResumeEvaluation, files=[resume_file_input]
     )
 
     total_score = calculate_weighted_score(gemini_response)
