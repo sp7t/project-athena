@@ -1,6 +1,8 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+SKILLS_EMPTY_MESSAGE = "Skills list must contain at least one non-empty item."
 
 
 class SkillsValidationError(ValueError):
@@ -20,6 +22,17 @@ class CandidateInfo(BaseModel):
         ..., alias="title", description="Job title the candidate applied for."
     )
 
+    # Trim and validate skills
+    @field_validator("skills")
+    @classmethod
+    def validate_skills_not_empty(cls, v: list[str]) -> list[str]:
+        """Validate that skills list contains at least one non-empty item and trim whitespace."""
+        # Keep only non-empty strings, trimmed
+        cleaned = [s.strip() for s in v if isinstance(s, str) and s.strip()]
+        if not cleaned:
+            raise SkillsValidationError(SKILLS_EMPTY_MESSAGE)
+        return cleaned
+
 
 class EmailGenerationRequest(BaseModel):
     """Schema representing an email generation request."""
@@ -32,7 +45,7 @@ class EmailGenerationRequest(BaseModel):
         ..., description='Final decision: "Yes" for selected, "No" for rejected.'
     )
 
-    # Optional reason for acceptance or rejection
+    # Neutral field name, accept legacy key `rejection_reason`
     reason: str | None = Field(
         default=None,
         alias="rejection_reason",
