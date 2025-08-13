@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from backend.candidate_comparisons.schemas import (
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def _to_int_0_100(value: float) -> int:
+    """Clamp to [0,100] and return int."""
     try:
         v = float(value)
     except (ValueError, TypeError):
@@ -29,16 +31,20 @@ def _to_int_0_100(value: float) -> int:
 
 
 def _map_feedback(resp: ResumeEvaluationResponse) -> CandidateFeedback:
-    return CandidateFeedback(
-        Skills_Match=resp.skills.feedback,
-        Experience_Relevance=resp.experience.feedback,
-        Keyword_Match=resp.keywords.feedback,
-        Projects=resp.projects.feedback,
-        Education=resp.education.feedback,
-        Formatting=resp.presentation.feedback,
-        Additional_Value=resp.extras.feedback,
-        Summary=resp.summary,
-    )
+    """Build CandidateFeedback from resume-eval response."""
+    data = {
+        "Skills_Match": resp.skills.feedback,
+        "Experience_Relevance": resp.experience.feedback,
+        "Keyword_Match": resp.keywords.feedback,
+        "Projects": resp.projects.feedback,
+        "Education": resp.education.feedback,
+        "Formatting": resp.presentation.feedback,
+        "Additional_Value": resp.extras.feedback,
+        "Summary": getattr(resp, "summary", None),
+    }
+    # Only pass fields that exist on the model (schema-safe)
+    allowed = {k: v for k, v in data.items() if k in CandidateFeedback.model_fields}
+    return CandidateFeedback(**allowed)
 
 
 def _map_to_candidate_result(
@@ -53,17 +59,20 @@ def _map_to_candidate_result(
         Formatting=_to_int_0_100(resp.presentation.score),
         Additional_Value=_to_int_0_100(resp.extras.score),
     )
-    overall = float(resp.overall_score)
-    cand = CandidateResult(
-        name=resp.name,
-        score=score,
-        overall_score=_to_int_0_100(overall),
-        verdict=str(
-            resp.verdict.value if hasattr(resp.verdict, "value") else resp.verdict
+    overall = float(getattr(resp, "overall_score", 0.0))
+
+    cand_data = {
+        "name": resp.name,
+        "score": score,
+        "overall_score": _to_int_0_100(overall),
+        "verdict": str(
+            getattr(getattr(resp, "verdict", ""), "value", getattr(resp, "verdict", ""))
         ),
-        feedback=_map_feedback(resp),
-    )
-    return cand, overall
+        "feedback": _map_feedback(resp),
+    }
+    # Only pass fields present in CandidateResult
+    allowed = {k: v for k, v in cand_data.items() if k in CandidateResult.model_fields}
+    return CandidateResult(**allowed), overall
 
 
 async def compare_candidates(
@@ -75,32 +84,39 @@ async def compare_candidates(
             candidates=[], comparison_summary="No resumes provided."
         )
 
-    tasks = [
-        (
-            r.filename or f"candidate_{i + 1}",
-            asyncio.create_task(evaluate_resume(r, job_description)),
+    # Build tasks with sanitized display names
+    tasks: list[tuple[str, asyncio.Task]] = []
+    for i, r in enumerate(resumes):
+        raw_name = r.filename or f"candidate_{i + 1}"
+        name_no_ext = Path(raw_name).stem or f"candidate_{i + 1}"
+        tasks.append(
+            (name_no_ext, asyncio.create_task(evaluate_resume(r, job_description)))
         )
-        for i, r in enumerate(resumes)
-    ]
 
     results: list[tuple[CandidateResult, float]] = []
     failures: list[str] = []
 
     gathered = await asyncio.gather(*(t for _, t in tasks), return_exceptions=True)
 
-    for (fname, _), res in zip(tasks, gathered, strict=False):
+    for (fname, _task), res in zip(tasks, gathered, strict=True):
         if isinstance(res, Exception):
-            logger.exception("Evaluation failed for %s", fname, exc_info=res)
-            failures.append(f"{fname} -> {res.__class__.__name__}: {res}")
+            # Preserve traceback in logs
+            logger.error(
+                "Evaluation failed for %s",
+                fname,
+                exc_info=(type(res), res, res.__traceback__),
+            )
+            failures.append(f"{fname} -> {res.__class__.__name__}")
             continue
         try:
             cand, overall = _map_to_candidate_result(res)
             results.append((cand, overall))
-        except Exception as e:
+        except Exception:
             logger.exception("Mapping failed for %s", fname)
-            failures.append(f"{fname} -> MappingError: {e}")
+            failures.append(f"{fname} -> MappingError")
 
     if results:
+        # Sort by computed overall score (desc)
         results.sort(key=lambda t: t[1], reverse=True)
         candidates_sorted = [c for c, _ in results]
         top3 = ", ".join(

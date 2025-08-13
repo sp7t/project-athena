@@ -1,22 +1,22 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.core.schemas import LLMErrorResponse
 
 
 class CandidateScore(BaseModel):
-    """Score breakdown for candidate evaluation categories."""
+    """Per-category scores; each must be an integer in [0, 100]."""
 
-    Skills_Match: int
-    Experience_Relevance: int
-    Keyword_Match: int
-    Projects: int
-    Education: int
-    Formatting: int
-    Additional_Value: int
+    Skills_Match: int = Field(ge=0, le=100)
+    Experience_Relevance: int = Field(ge=0, le=100)
+    Keyword_Match: int = Field(ge=0, le=100)
+    Projects: int = Field(ge=0, le=100)
+    Education: int = Field(ge=0, le=100)
+    Formatting: int = Field(ge=0, le=100)
+    Additional_Value: int = Field(ge=0, le=100)
 
 
 class CandidateFeedback(BaseModel):
-    """Text feedback for candidate evaluation categories."""
+    """Natural-language feedback per category + overall notes."""
 
     Skills_Match: str
     Experience_Relevance: str
@@ -29,7 +29,7 @@ class CandidateFeedback(BaseModel):
 
 
 class CandidateResult(BaseModel):
-    """Individual candidate evaluation result."""
+    """Result for a single candidate."""
 
     name: str
     score: CandidateScore
@@ -39,7 +39,7 @@ class CandidateResult(BaseModel):
 
 
 class CandidateComparisonResponse(BaseModel):
-    """Response containing multiple candidate comparison results."""
+    """Top-level response for comparisons."""
 
     candidates: list[CandidateResult]
     comparison_summary: str

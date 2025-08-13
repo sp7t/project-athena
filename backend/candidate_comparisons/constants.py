@@ -1,8 +1,10 @@
-CANDIDATE_COMPARISON_PROMPT = """
+from string import Template
+
+CANDIDATE_COMPARISON_PROMPT = Template("""
 You are an advanced Candidate Comparison Engine for an ATS.
 
 ## Instructions:
-1. For each uploaded PDF resume, score it strictly in this JSON format:
+1. Return ONLY a valid JSON array (no prose). Each element MUST be exactly:
 {
   "name": "Candidate 1",
   "score": {
@@ -15,11 +17,14 @@ You are an advanced Candidate Comparison Engine for an ATS.
     "Additional_Value": 5
   }
 }
-2. Do NOT add extra keys. Do NOT wrap the JSON in prose. Only return valid JSON that matches this shape.
+- All score values MUST be integers in [0, 100].
+- The sum of all score components for each candidate MUST equal 100.
+- Do NOT include extra keys, comments, or trailing commas.
 
 ## Job Description:
-{{job_description}}
+$job_description
 
 ## Resumes:
-Use the attached PDF files only.
-"""
+Use ONLY the attached PDF files. Score each resume independently and output
+one array element per resume in the same order as the files are provided.
+""")
