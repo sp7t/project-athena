@@ -63,7 +63,6 @@ class FileInput(BaseModel):
 
         if file_size > GEMINI_MAX_FILE_SIZE:
             raise FileSizeExceededError(file_size, GEMINI_MAX_FILE_SIZE)
-
         return v
 
     def get_file_bytes(self) -> bytes:

@@ -10,12 +10,10 @@ class StructuredOutputError(Exception):
         self.schema_name = schema_name
         self.raw_response = raw_response
         self.validation_errors = validation_errors
-
         base_msg = f"Failed to parse Gemini response into {schema_name}"
         if validation_errors:
             base_msg += f" [Validation Errors: {validation_errors}]"
         base_msg += f" [Raw Response: {raw_response[:500]}...]"
-
         super().__init__(base_msg)
 
 
@@ -32,10 +30,8 @@ class FileSizeExceededError(APIException):
     ) -> None:
         self.file_size = file_size
         self.max_size = max_size
-
         if detail is None:
             detail = f"File size {file_size} bytes exceeds maximum allowed size of {max_size} bytes"
-
         super().__init__(
             status_code=status_code, detail=detail, debug_context=debug_context
         )
@@ -54,10 +50,8 @@ class TotalRequestSizeExceededError(APIException):
     ) -> None:
         self.total_size = total_size
         self.max_size = max_size
-
         if detail is None:
             detail = f"Total request size {total_size} bytes exceeds maximum allowed size of {max_size} bytes"
-
         super().__init__(
             status_code=status_code, detail=detail, debug_context=debug_context
         )
