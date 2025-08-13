@@ -11,10 +11,11 @@ def revalidate_instance(instance: BaseModel) -> None:
 
     Raises:
         ValidationError: If validation fails
+
     """
     try:
         instance.model_validate(instance.model_dump())
     except ValidationError as e:
         raise ValidationError.from_exception_data(
             title="Validation Error", line_errors=e.errors(), model=instance.__class__
-        )
+        ) from e

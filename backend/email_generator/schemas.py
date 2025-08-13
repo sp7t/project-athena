@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class SkillsValidationError(ValueError):
@@ -22,13 +22,21 @@ class CandidateInfo(BaseModel):
 class EmailGenerationRequest(BaseModel):
     """Schema representing an email generation request."""
 
+    # allow populating by field name or alias
+    model_config = ConfigDict(populate_by_name=True)
+
     candidate: CandidateInfo = Field(description="Details of the candidate.")
     verdict: Literal["Yes", "No"] = Field(
         ..., description='Final decision: "Yes" for selected, "No" for rejected.'
     )
-    reason: str | None = Field(
-        None, description="Reason for pass or rejection, if applicable."
+
+    # Expose as `rejection_reason` in code, accept JSON key `reason`
+    rejection_reason: str | None = Field(
+        None,
+        alias="reason",
+        description="Reason for pass or rejection, if applicable.",
     )
+
     notes: str | None = Field(
         None, description="Additional notes to include in the email."
     )
