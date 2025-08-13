@@ -35,6 +35,7 @@ class EmailGenerationRequest(BaseModel):
     # Optional reason for acceptance or rejection
     reason: str | None = Field(
         default=None,
+        alias="rejection_reason",
         description="Optional reason for acceptance or rejection.",
     )
 

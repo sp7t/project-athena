@@ -14,7 +14,7 @@ async def generate_email(request: EmailGenerationRequest) -> EmailGenerationResp
         experience=request.candidate.experience,
         skills=", ".join(request.candidate.skills),
         verdict=request.verdict,
-        rejection_reason=request.rejection_reason,
+        rejection_reason=getattr(request, "reason", None),
         notes=request.notes,
     )
     generated_email = await generate_text(prompt)
