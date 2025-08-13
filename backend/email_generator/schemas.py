@@ -31,7 +31,7 @@ class EmailGenerationRequest(BaseModel):
     )
 
     # Expose as `rejection_reason` in code, accept JSON key `reason`
-    rejection_reason: str | None = Field(
+    reason: str | None = Field(
         None,
         alias="reason",
         description="Reason for pass or rejection, if applicable.",
