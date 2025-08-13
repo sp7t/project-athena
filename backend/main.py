@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from backend.candidate_comparisons.router import (
-    router as candidate_comparison_router,
+    router as candidate_comparisons_router,
 )
 from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
@@ -12,7 +12,7 @@ from backend.resume_evaluations.router import router as resume_evaluations_route
 router = APIRouter()
 router.include_router(job_descriptions_router)
 router.include_router(resume_evaluations_router)
-router.include_router(candidate_comparison_router)
+router.include_router(candidate_comparisons_router)
 
 app = FastAPI(
     title="Project Athena",
