@@ -16,7 +16,9 @@ class CandidateInfo(BaseModel):
         ..., description="List of candidate's skills (at least one)."
     )
     experience: str = Field(..., description="Candidate's experience summary.")
-    title: str = Field(..., description="Job title the candidate applied for.")
+    job_title: str = Field(
+        ..., alias="title", description="Job title the candidate applied for."
+    )
 
 
 class EmailGenerationRequest(BaseModel):
@@ -30,11 +32,10 @@ class EmailGenerationRequest(BaseModel):
         ..., description='Final decision: "Yes" for selected, "No" for rejected.'
     )
 
-    # Expose as `rejection_reason` in code, accept JSON key `reason`
+    # Optional reason for acceptance or rejection
     reason: str | None = Field(
-        None,
-        alias="reason",
-        description="Reason for pass or rejection, if applicable.",
+        default=None,
+        description="Optional reason for acceptance or rejection.",
     )
 
     notes: str | None = Field(

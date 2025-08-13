@@ -10,7 +10,7 @@ async def generate_email(request: EmailGenerationRequest) -> EmailGenerationResp
     """Generate an candidate pass/rejection email."""
     prompt = EMAIL_GENERATION_PROMPT.format(
         name=request.candidate.name,
-        title=request.candidate.title,
+        title=request.candidate.job_title,
         experience=request.candidate.experience,
         skills=", ".join(request.candidate.skills),
         verdict=request.verdict,
