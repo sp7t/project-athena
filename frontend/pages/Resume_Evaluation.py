@@ -1,10 +1,8 @@
 from pathlib import Path
-from typing import IO, Any
+from typing import Any
 
 import requests
 import streamlit as st
-from PyPDF2 import PdfReader
-from PyPDF2.errors import PdfReadError
 
 from frontend.components.header import render_header
 from frontend.components.scorecard import render_scorecard_html
@@ -36,26 +34,13 @@ def render_custom_textarea_label() -> None:
     )
 
 
-def extract_resume_text(pdf_file: IO[bytes]) -> str:
-    """Extract text from uploaded PDF file."""
-    try:
-        pdf = PdfReader(pdf_file)
-        return "\n".join(page.extract_text() or "" for page in pdf.pages)
-    except PdfReadError as e:
-        st.error(f"PDF read error: {e!s}")
-    except Exception as e:  # fallback for unexpected errors  # noqa: BLE001
-        st.error(f"Unexpected error extracting text: {e!s}")
-    return ""
-
-
 def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) -> None:
     """Render the individual scorecards using components.html inside columns."""
     st.markdown("### Individual Scores")
 
     cols = st.columns(3)
-
     for idx, (label, total) in enumerate(score_max.items()):
-        score = data.get(label, 0)
+        score = int(data.get(label, 0) or 0)
         with cols[idx % 3]:
             render_scorecard_html(label.replace("_", " ").title(), score, total)
 
@@ -73,19 +58,19 @@ def render_feedback_sections(data: dict[str, Any]) -> None:
     st.info(data.get("summary_feedback", "No summary provided."))
 
     st.markdown("<h3>Detailed Feedback</h3>", unsafe_allow_html=True)
-    for field, feedback in data.get("detailed_feedback", {}).items():
+    for field, feedback in (data.get("detailed_feedback") or {}).items():
         label = field.replace("_feedback", "").replace("_", " ").title()
         st.write(f"**{label}:** {feedback}")
 
     st.markdown("<h3>Missing Qualifications</h3>", unsafe_allow_html=True)
-    missing = data.get("missing_qualifications", [])
+    missing = data.get("missing_qualifications") or []
     if not missing:
         st.write("None identified.")
     for item in missing:
         st.write(f"- {item}")
 
     st.markdown("<h3>Improvement Suggestions</h3>", unsafe_allow_html=True)
-    suggestions = data.get("improvement_suggestions", [])
+    suggestions = data.get("improvement_suggestions") or []
     if not suggestions:
         st.write("No suggestions provided.")
     for item in suggestions:
@@ -118,17 +103,14 @@ with st.form("upload_form"):
     submit = st.form_submit_button("Analyze Resume")
 
 if submit:
-    if not resume_file or not job_description:
+    if resume_file is None or not job_description.strip():
         st.warning("Please upload both resume and job description.")
         st.stop()
 
-    resume_text = extract_resume_text(resume_file)
-    if not resume_text.strip():
-        st.error("Resume text is empty. Please upload a valid PDF.")
-        st.stop()
-
     try:
-        data = analyze_resume(resume_text, job_description)
+        with st.spinner("Analyzing your resume..."):
+            # ✅ Pass the uploaded file directly; backend/Gemini parses it.
+            data: dict[str, Any] = analyze_resume(resume_file, job_description)
     except requests.exceptions.RequestException as e:
         st.error(f"Network error during resume analysis: {e!s}")
         st.stop()
@@ -139,7 +121,7 @@ if submit:
         st.error(f"Unexpected error during analysis: {e!s}")
         st.stop()
 
-    score_max = {
+    score_max: dict[str, int] = {
         "skills_match": 30,
         "experience_relevance": 20,
         "keyword_match": 15,
@@ -148,10 +130,11 @@ if submit:
         "formatting": 5,
         "additional_value": 5,
     }
-    ats_score = sum(data.get(label, 0) for label in score_max)
+    ats_score = sum(int(data.get(label, 0) or 0) for label in score_max)
 
     st.markdown(
-        f"<h2>Resume Evaluation Score: {ats_score}/100</h2>", unsafe_allow_html=True
+        f"<h2>Resume Evaluation Score: {ats_score}/100</h2>",
+        unsafe_allow_html=True,
     )
 
     render_candidate_info(data)
