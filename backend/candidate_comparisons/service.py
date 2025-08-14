@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import ntpath
 import os
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from backend.candidate_comparisons.schemas import (
@@ -38,6 +38,10 @@ def _to_int_0_100(value: float) -> int:
 
 
 def _map_feedback(resp: "ResumeEvaluationResponse") -> CandidateFeedback:
+    """Build CandidateFeedback while tolerating None/missing values from the LLM.
+
+    Coerce None to "" and ensure values are strings, then filter to model fields.
+    """
     data = {
         "Skills_Match": resp.skills.feedback,
         "Experience_Relevance": resp.experience.feedback,
@@ -46,10 +50,15 @@ def _map_feedback(resp: "ResumeEvaluationResponse") -> CandidateFeedback:
         "Education": resp.education.feedback,
         "Formatting": resp.presentation.feedback,
         "Additional_Value": resp.extras.feedback,
-        "Summary": getattr(resp, "summary", None),
+        "Summary": getattr(resp, "summary", ""),
     }
-    # Only keep fields that actually exist on the Pydantic model
-    allowed = {k: v for k, v in data.items() if k in CandidateFeedback.model_fields}
+
+    # Only keep fields that exist on the Pydantic model and coerce None to ""
+    allowed = {
+        k: ("" if v is None else str(v))
+        for k, v in data.items()
+        if k in CandidateFeedback.model_fields
+    }
     return CandidateFeedback(**allowed)
 
 
@@ -95,13 +104,14 @@ async def compare_candidates(
             candidates=[], comparison_summary="No resumes provided."
         )
 
-    # Build tasks with sanitized display names (strip path & extension)
+    # Build tasks with sanitized display names
     tasks: list[tuple[str, asyncio.Task]] = []
     sem = asyncio.Semaphore(MAX_CONCURRENCY)
 
     for i, r in enumerate(resumes):
         raw_name = r.filename or f"candidate_{i + 1}"
-        name_no_ext = Path(raw_name).stem or f"candidate_{i + 1}"
+        base = ntpath.basename(raw_name)
+        name_no_ext = ntpath.splitext(base)[0] or f"candidate_{i + 1}"
         tasks.append(
             (
                 name_no_ext,
@@ -114,7 +124,7 @@ async def compare_candidates(
 
     gathered = await asyncio.gather(*(t for _, t in tasks), return_exceptions=True)
 
-    for (fname, _task), res in zip(tasks, gathered):
+    for (fname, _task), res in zip(tasks, gathered, strict=True):
         if isinstance(res, Exception):
             logger.error(
                 "Evaluation failed for %s",
