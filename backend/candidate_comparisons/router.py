@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/compare")
+@router.post("/compare", response_model=CandidateComparisonLLMResponse)
 async def compare(
     job_description: Annotated[
         str,
