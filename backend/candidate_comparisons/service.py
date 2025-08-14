@@ -20,12 +20,19 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Harden env parsing for MAX_CONCURRENCY (default 3)
+#  env parsing for MAX_CONCURRENCY (default 3)
 try:
     _max_conc = int(os.getenv("ATHENA_COMPARE_MAX_CONCURRENCY", "3"))
 except (TypeError, ValueError):
     _max_conc = 3
 MAX_CONCURRENCY = max(1, _max_conc)
+
+# Timeout for each resume evaluation
+try:
+    _eval_timeout = float(os.getenv("ATHENA_COMPARE_EVAL_TIMEOUT_SECONDS", "60"))
+except (TypeError, ValueError):
+    _eval_timeout = 60.0
+EVAL_TIMEOUT_SECONDS = max(1.0, _eval_timeout)
 
 
 def _to_int_0_100(value: float) -> int:
@@ -53,7 +60,7 @@ def _map_feedback(resp: "ResumeEvaluationResponse") -> CandidateFeedback:
         "Summary": getattr(resp, "summary", ""),
     }
 
-    # Only keep fields that exist on the Pydantic model and coerce None to ""
+    # Only keep fields that exist on the Pydantic model
     allowed = {
         k: ("" if v is None else str(v))
         for k, v in data.items()
@@ -92,7 +99,11 @@ async def _evaluate_with_sem(
     sem: asyncio.Semaphore, r: "UploadFile", job_description: str
 ) -> "ResumeEvaluationResponse":
     async with sem:
-        return await evaluate_resume(r, job_description)
+        # Enforce a per-item timeout to avoid indefinite hangs
+        return await asyncio.wait_for(
+            evaluate_resume(r, job_description),
+            timeout=EVAL_TIMEOUT_SECONDS,
+        )
 
 
 async def compare_candidates(
