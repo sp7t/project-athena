@@ -9,7 +9,7 @@ from backend.exceptions import APIException
 from backend.job_descriptions.router import router as job_descriptions_router
 from backend.resume_evaluations.router import router as resume_evaluations_router
 
-# Optional flag: only log debug_context when explicitly enabled
+#  only log debug_context when explicitly enabled
 LOG_API_DEBUG_CONTEXT = os.getenv("LOG_API_DEBUG_CONTEXT", "").lower() in {
     "1",
     "true",
@@ -30,9 +30,7 @@ app = FastAPI(
 @app.exception_handler(APIException)
 async def api_exception_handler(_request: Request, exc: APIException) -> JSONResponse:
     """Handle custom API exceptions with structured error responses."""
-    # Avoid leaking PII/debug_context via __str__.
     logger.error("API Exception: {}", exc.detail)
-    # If you need extra context while debugging, enable via env var
     if LOG_API_DEBUG_CONTEXT and getattr(exc, "debug_context", None):
         logger.debug("APIException debug_context: {}", exc.debug_context)
     return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
@@ -41,7 +39,7 @@ async def api_exception_handler(_request: Request, exc: APIException) -> JSONRes
 @app.exception_handler(Exception)
 async def global_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with generic error responses."""
-    # For unexpected errors, keep traceback in logs but return generic message to clients
+    # For unexpected errors, keep traceback in logs
     logger.opt(exception=exc).error("Unexpected error")
     return JSONResponse(
         status_code=500, content={"error": "An unexpected error occurred"}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -19,9 +20,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+MAX_CONCURRENCY = max(1, int(os.getenv("ATHENA_COMPARE_MAX_CONCURRENCY", "3")))
+
 
 def _to_int_0_100(value: float) -> int:
-    """Clamp to [0,100] and return int."""
     try:
         v = float(value)
     except (ValueError, TypeError):
@@ -31,7 +33,6 @@ def _to_int_0_100(value: float) -> int:
 
 
 def _map_feedback(resp: ResumeEvaluationResponse) -> CandidateFeedback:
-    """Build CandidateFeedback from resume-eval response."""
     data = {
         "Skills_Match": resp.skills.feedback,
         "Experience_Relevance": resp.experience.feedback,
@@ -42,7 +43,6 @@ def _map_feedback(resp: ResumeEvaluationResponse) -> CandidateFeedback:
         "Additional_Value": resp.extras.feedback,
         "Summary": getattr(resp, "summary", None),
     }
-    # Only pass fields that exist on the model (schema-safe)
     allowed = {k: v for k, v in data.items() if k in CandidateFeedback.model_fields}
     return CandidateFeedback(**allowed)
 
@@ -60,7 +60,6 @@ def _map_to_candidate_result(
         Additional_Value=_to_int_0_100(resp.extras.score),
     )
     overall = float(getattr(resp, "overall_score", 0.0))
-
     cand_data = {
         "name": resp.name,
         "score": score,
@@ -70,9 +69,15 @@ def _map_to_candidate_result(
         ),
         "feedback": _map_feedback(resp),
     }
-    # Only pass fields present in CandidateResult
     allowed = {k: v for k, v in cand_data.items() if k in CandidateResult.model_fields}
     return CandidateResult(**allowed), overall
+
+
+async def _evaluate_with_sem(
+    sem: asyncio.Semaphore, r: UploadFile, job_description: str
+) -> ResumeEvaluationResponse:
+    async with sem:
+        return await evaluate_resume(r, job_description)
 
 
 async def compare_candidates(
@@ -84,13 +89,18 @@ async def compare_candidates(
             candidates=[], comparison_summary="No resumes provided."
         )
 
-    # Build tasks with sanitized display names
+    # Build tasks with sanitized display names (strip path & extension)
     tasks: list[tuple[str, asyncio.Task]] = []
+    sem = asyncio.Semaphore(MAX_CONCURRENCY)
+
     for i, r in enumerate(resumes):
         raw_name = r.filename or f"candidate_{i + 1}"
         name_no_ext = Path(raw_name).stem or f"candidate_{i + 1}"
         tasks.append(
-            (name_no_ext, asyncio.create_task(evaluate_resume(r, job_description)))
+            (
+                name_no_ext,
+                asyncio.create_task(_evaluate_with_sem(sem, r, job_description)),
+            )
         )
 
     results: list[tuple[CandidateResult, float]] = []
@@ -100,7 +110,6 @@ async def compare_candidates(
 
     for (fname, _task), res in zip(tasks, gathered, strict=True):
         if isinstance(res, Exception):
-            # Preserve traceback in logs
             logger.error(
                 "Evaluation failed for %s",
                 fname,
@@ -116,7 +125,6 @@ async def compare_candidates(
             failures.append(f"{fname} -> MappingError")
 
     if results:
-        # Sort by computed overall score (desc)
         results.sort(key=lambda t: t[1], reverse=True)
         candidates_sorted = [c for c, _ in results]
         top3 = ", ".join(

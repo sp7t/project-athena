@@ -1,6 +1,7 @@
+import os
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from backend.candidate_comparisons.schemas import CandidateComparisonLLMResponse
 from backend.candidate_comparisons.service import compare_candidates
@@ -11,22 +12,23 @@ router = APIRouter(
     tags=["Candidate Comparisons"],
 )
 
+MAX_RESUMES = max(1, int(os.getenv("ATHENA_COMPARE_MAX_RESUMES", "10")))
+
 
 @router.post("/compare", response_model=CandidateComparisonLLMResponse)
 async def compare(
     job_description: Annotated[
-        str,
-        Form(min_length=1, description="Job description text"),
+        str, Form(min_length=1, description="Job description text")
     ],
-    resumes: Annotated[
-        list[UploadFile],
-        File(description="Resume PDF files (.pdf)"),
-    ],
+    resumes: Annotated[list[UploadFile], File(description="Resume PDF files (.pdf)")],
 ) -> CandidateComparisonLLMResponse:
-    """Compare multiple uploaded PDF resumes against a job description.
+    """Compare multiple uploaded PDF resumes against a job description."""
+    if len(resumes) > MAX_RESUMES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Too many resumes uploaded ({len(resumes)}). Maximum allowed is {MAX_RESUMES}.",
+        )
 
-    Returns structured scores for each candidate and a summary.
-    """
     # Validate resume formats
     for f in resumes:
         if (
@@ -36,7 +38,4 @@ async def compare(
         ):
             raise InvalidResumeFormatError
 
-    return await compare_candidates(
-        job_description=job_description,
-        resumes=resumes,
-    )
+    return await compare_candidates(job_description=job_description, resumes=resumes)
