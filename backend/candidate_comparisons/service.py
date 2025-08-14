@@ -20,7 +20,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-MAX_CONCURRENCY = max(1, int(os.getenv("ATHENA_COMPARE_MAX_CONCURRENCY", "3")))
+# Harden env parsing for MAX_CONCURRENCY (default 3)
+try:
+    _max_conc = int(os.getenv("ATHENA_COMPARE_MAX_CONCURRENCY", "3"))
+except (TypeError, ValueError):
+    _max_conc = 3
+MAX_CONCURRENCY = max(1, _max_conc)
 
 
 def _to_int_0_100(value: float) -> int:
@@ -29,10 +34,10 @@ def _to_int_0_100(value: float) -> int:
     except (ValueError, TypeError):
         v = 0.0
     v = max(0.0, min(100.0, v))
-    return round(v)
+    return int(round(v))
 
 
-def _map_feedback(resp: ResumeEvaluationResponse) -> CandidateFeedback:
+def _map_feedback(resp: "ResumeEvaluationResponse") -> CandidateFeedback:
     data = {
         "Skills_Match": resp.skills.feedback,
         "Experience_Relevance": resp.experience.feedback,
@@ -43,12 +48,13 @@ def _map_feedback(resp: ResumeEvaluationResponse) -> CandidateFeedback:
         "Additional_Value": resp.extras.feedback,
         "Summary": getattr(resp, "summary", None),
     }
+    # Only keep fields that actually exist on the Pydantic model
     allowed = {k: v for k, v in data.items() if k in CandidateFeedback.model_fields}
     return CandidateFeedback(**allowed)
 
 
 def _map_to_candidate_result(
-    resp: ResumeEvaluationResponse,
+    resp: "ResumeEvaluationResponse",
 ) -> tuple[CandidateResult, float]:
     score = CandidateScore(
         Skills_Match=_to_int_0_100(resp.skills.score),
@@ -74,14 +80,14 @@ def _map_to_candidate_result(
 
 
 async def _evaluate_with_sem(
-    sem: asyncio.Semaphore, r: UploadFile, job_description: str
-) -> ResumeEvaluationResponse:
+    sem: asyncio.Semaphore, r: "UploadFile", job_description: str
+) -> "ResumeEvaluationResponse":
     async with sem:
         return await evaluate_resume(r, job_description)
 
 
 async def compare_candidates(
-    job_description: str, resumes: list[UploadFile]
+    job_description: str, resumes: list["UploadFile"]
 ) -> CandidateComparisonResponse:
     """Compare multiple resumes against a job description and return structured results."""
     if not resumes:
@@ -108,7 +114,7 @@ async def compare_candidates(
 
     gathered = await asyncio.gather(*(t for _, t in tasks), return_exceptions=True)
 
-    for (fname, _task), res in zip(tasks, gathered, strict=True):
+    for (fname, _task), res in zip(tasks, gathered):
         if isinstance(res, Exception):
             logger.error(
                 "Evaluation failed for %s",
@@ -139,5 +145,6 @@ async def compare_candidates(
         summary += f" Failures: {', '.join(failures)}"
 
     return CandidateComparisonResponse(
-        candidates=candidates_sorted, comparison_summary=summary
+        candidates=candidates_sorted,
+        comparison_summary=summary,
     )
