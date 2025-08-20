@@ -5,8 +5,9 @@ import requests
 import streamlit as st
 
 from frontend.components.header import render_header
-from frontend.components.scorecard import render_scorecard_html
 from frontend.services.resume_service import analyze_resume
+
+# ---------- helpers ----------
 
 
 def load_css() -> None:
@@ -15,92 +16,106 @@ def load_css() -> None:
     if css_path.exists():
         with css_path.open() as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.error("CSS file not found.")
 
 
 def render_custom_textarea_label() -> None:
-    """Apply custom style to textarea label."""
+    """Apply custom style to textarea label and local styles."""
     st.markdown(
         """
         <style>
-        .stTextArea label {
-            color: #111827 !important;
-            font-weight: 600;
-        }
+        .stTextArea label { color: #111827 !important; font-weight: 600; }
+        .kpi { font-size: 1.75rem; font-weight: 700; margin: 0.5rem 0 1.25rem; }
+        .candidate-name { font-size: 1.5rem; font-weight: 800; margin: .25rem 0 1rem; }
+        .detail-line { margin: .35rem 0 .35rem; line-height: 1.5; }
+        .section-title { margin-top: 1.75rem; }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 
-def render_individual_scores(data: dict[str, Any], score_max: dict[str, int]) -> None:
-    """Render the individual scorecards using components.html inside columns."""
-    st.markdown("### Individual Scores")
+def get_overall_score(payload: dict[str, Any]) -> int:
+    """Best-effort extraction of overall score (int 0-100)."""
+    for key in ("overall_score", "total_score", "ats_score", "score"):
+        val = payload.get(key)
+        if isinstance(val, (int, float)):
+            return round(val)
+    # fallback: average category scores if present
+    cats = [
+        payload.get("skills", {}),
+        payload.get("experience", {}),
+        payload.get("keywords", {}),
+        payload.get("projects", {}),
+        payload.get("education", {}),
+        payload.get("presentation", {}),
+        payload.get("extras", {}),
+    ]
+    scores = [
+        c.get("score")
+        for c in cats
+        if isinstance(c, dict) and isinstance(c.get("score"), (int, float))
+    ]
+    return round(sum(scores) / len(scores)) if scores else 0
 
-    cols = st.columns(3)
-    for idx, (label, total) in enumerate(score_max.items()):
-        score = int(data.get(label, 0) or 0)
-        with cols[idx % 3]:
-            render_scorecard_html(label.replace("_", " ").title(), score, total)
+
+def render_category_lines(payload: dict[str, Any]) -> None:
+    """Render 'Category (NN/100): feedback' lines, skipping missing."""
+    categories: list[tuple[str, str]] = [
+        ("skills", "Skills Match"),
+        ("experience", "Experience Relevance"),
+        ("keywords", "Keyword Match"),
+        ("projects", "Projects"),
+        ("education", "Education"),
+        ("presentation", "Formatting"),
+        ("extras", "Additional Value"),
+    ]
+
+    st.markdown("### Detailed Feedback", unsafe_allow_html=True)
+    for key, label in categories:
+        block = payload.get(key)
+        if not isinstance(block, dict):
+            continue
+        score = block.get("score")
+        feedback = block.get("feedback") or "—"
+        score_txt = (
+            f"{round(score)}/100" if isinstance(score, (int, float)) else "—/100"
+        )
+        st.markdown(
+            f"<div class='detail-line'><strong>{label} ({score_txt}):</strong> {feedback}</div>",
+            unsafe_allow_html=True,
+        )
 
 
-def render_candidate_info(data: dict[str, Any]) -> None:
-    """Display the candidate's full name if available."""
-    name = data.get("candidate_name")
-    if name:
-        st.markdown(f"<h2>Candidate: {name}</h2>", unsafe_allow_html=True)
-
-
-def render_feedback_sections(data: dict[str, Any]) -> None:
-    """Render feedback sections: summary, detailed feedback, missing qualifications, suggestions."""
-    st.markdown("<h3>Summary Feedback</h3>", unsafe_allow_html=True)
-    st.info(data.get("summary_feedback", "No summary provided."))
-
-    st.markdown("<h3>Detailed Feedback</h3>", unsafe_allow_html=True)
-    for field, feedback in (data.get("detailed_feedback") or {}).items():
-        label = field.replace("_feedback", "").replace("_", " ").title()
-        st.write(f"**{label}:** {feedback}")
-
-    st.markdown("<h3>Missing Qualifications</h3>", unsafe_allow_html=True)
-    missing = data.get("missing_qualifications") or []
-    if not missing:
+def render_optional_list(title: str, items: str | list[str]) -> None:
+    """Render a list section if items exist (handles str or list[str])."""
+    st.markdown(f"### {title}", unsafe_allow_html=True)
+    if not items:
         st.write("None identified.")
-    for item in missing:
-        st.write(f"- {item}")
-
-    st.markdown("<h3>Improvement Suggestions</h3>", unsafe_allow_html=True)
-    suggestions = data.get("improvement_suggestions") or []
-    if not suggestions:
-        st.write("No suggestions provided.")
-    for item in suggestions:
-        st.write(f"- {item}")
+        return
+    if isinstance(items, str):
+        st.write(items)
+        return
+    if isinstance(items, list):
+        for it in items:
+            st.write(f"- {it}")
 
 
-def render_verdict_section(data: dict[str, Any]) -> None:
-    """Render the final verdict section if available."""
-    verdict = data.get("verdict")
-    if verdict:
-        st.markdown("### Verdict")
-        st.success(verdict)
+# ---------- page setup ----------
 
-
-# Set page config
 st.set_page_config(page_title="Athena Resume Analyzer", layout="wide")
-
-# Load CSS & custom label styling
 load_css()
 render_custom_textarea_label()
-
-# Render Header
 render_header()
 
-# Upload Form
+# ---------- form ----------
+
 with st.form("upload_form"):
     st.subheader("Upload Resume & Paste Job Description")
     resume_file = st.file_uploader("Upload Resume (PDF Only)", type=["pdf"])
     job_description = st.text_area("Paste Job Description Here", height=200)
     submit = st.form_submit_button("Analyze Resume")
+
+# ---------- submission ----------
 
 if submit:
     if resume_file is None or not job_description.strip():
@@ -109,7 +124,6 @@ if submit:
 
     try:
         with st.spinner("Analyzing your resume..."):
-            # ✅ Pass the uploaded file directly; backend/Gemini parses it.
             data: dict[str, Any] = analyze_resume(resume_file, job_description)
     except requests.exceptions.RequestException as e:
         st.error(f"Network error during resume analysis: {e!s}")
@@ -121,28 +135,48 @@ if submit:
         st.error(f"Unexpected error during analysis: {e!s}")
         st.stop()
 
-    score_max: dict[str, int] = {
-        "skills_match": 30,
-        "experience_relevance": 20,
-        "keyword_match": 15,
-        "projects": 15,
-        "education": 10,
-        "formatting": 5,
-        "additional_value": 5,
-    }
-    ats_score = sum(int(data.get(label, 0) or 0) for label in score_max)
-
+    # ---- top KPI (no weights shown) ----
+    overall = get_overall_score(data)
     st.markdown(
-        f"<h2>Resume Evaluation Score: {ats_score}/100</h2>",
+        f"<div class='kpi'>Overall Score: {overall}/100</div>",
         unsafe_allow_html=True,
     )
 
-    render_candidate_info(data)
-    render_individual_scores(data, score_max)
-    render_feedback_sections(data)
-    render_verdict_section(data)
+    # ---- candidate name (bigger & bold) ----
+    name = data.get("name") or data.get("candidate_name")
+    if isinstance(name, str) and name.strip():
+        st.markdown(
+            f"<div class='candidate-name'>Candidate: {name}</div>",
+            unsafe_allow_html=True,
+        )
 
-# Footer
+    # ---- summary ----
+    summary = data.get("summary") or data.get("summary_feedback")
+    if isinstance(summary, str) and summary.strip():
+        st.markdown("### Summary", unsafe_allow_html=True)
+        st.info(summary)
+
+    # ---- detailed lines like 'Skills Match (62/100): ...' ----
+    render_category_lines(data)
+
+    # ---- optional sections (supports old + new keys) ----
+    missing_items = (
+        data.get("missing_qualifications") or data.get("missing_requirements") or []
+    )
+    render_optional_list("Missing Qualifications", missing_items)
+
+    suggestions = (
+        data.get("improvement_suggestions") or data.get("recommendations") or []
+    )
+    render_optional_list("Improvement Suggestions", suggestions)
+
+    # ---- verdict ----
+    verdict = data.get("verdict")
+    if isinstance(verdict, str) and verdict.strip():
+        st.markdown("### Verdict", unsafe_allow_html=True)
+        st.success(verdict)
+
+# ---------- footer ----------
 st.markdown(
     "<div class='footer'>© 2025 Athena Resume Analyzer | Powered by 7T.ai</div>",
     unsafe_allow_html=True,
