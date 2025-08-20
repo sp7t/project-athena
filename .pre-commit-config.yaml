@@ -1,4 +1,13 @@
+default_install_hook_types: [pre-commit, commit-msg]
 repos:
+  - repo: local
+    hooks:
+      - id: branch-name-validation
+        name: Validate branch name format
+        entry: scripts/validate-branch-name.sh
+        language: system
+        pass_filenames: false
+        always_run: true
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -26,9 +35,8 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.2.0
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
     hooks:
-      - id: conventional-pre-commit
+      - id: commitizen
         stages: [commit-msg]
-        args: [--verbose]

@@ -3,7 +3,24 @@
   "editor.formatOnSave": true,
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.showEditor": false,
+  "conventionalCommits.scopes": [
+    "frontend",
+    "backend",
+    "shared",
+    "docs",
+    "ci",
+    "config",
+    "database",
+    "api"
+  ],
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
-  }
+  },
+  "git.allowForcePush": true,
+  "git.useForcePushWithLease": true,
+  "git.rebaseWhenSync": true,
+  "git.autoStash": true,
+  "git.useForcePushIfIncludes": true,
+  "git.confirmForcePush": true,
+  "git.mergeEditor": true
 }

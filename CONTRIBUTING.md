@@ -25,15 +25,29 @@ git clone https://github.com/sp7t/project-athena.git
 cd project-athena
 ```
 
-### 2. Install Dependencies & Pre-commit Hooks
+### 2. Install Dependencies & Git Hooks
 
-We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up pre-commit hooks to ensure code quality and consistency.
+We use `make` to simplify the setup process. These commands will install all necessary project dependencies using `uv` and set up Git hooks to ensure code quality and consistency.
 
 ```bash
 make install
 ```
 
-### 3. Set Up Environment Variables
+### 3. Configure Git for Linear History
+
+To maintain a clean, linear project history, configure Git to always rebase when pulling changes:
+
+```bash
+git config --global pull.rebase true
+git config --global rebase.autoStash true
+```
+
+These settings ensure that:
+
+- `git pull` will automatically rebase your local commits on top of the remote changes
+- Your work-in-progress changes are automatically stashed and restored during rebase
+
+### 4. Set Up Environment Variables
 
 Environment variables are crucial for configuring the application, especially for API keys and other sensitive information.
 
@@ -42,7 +56,7 @@ Environment variables are crucial for configuring the application, especially fo
     cp .env.example .env
     ```
 2.  Edit the `.env` file and add your specific configurations:
-    - **Gemini API Key**: You'll need a Gemini API Key for certain features.
+    - **Gemini API Key**: You'll need a Gemini API key for certain features.
       - _Instructions_: Obtain your Gemini API key from [Google AI Studio](https://ai.google.dev/gemini-api/docs/api-key) and add it to your `.env` file.
     - **Other Project Variables**: For other necessary environment variables, please contact your supervisor.
 
@@ -81,6 +95,12 @@ You can run these commands from the root of the project directory.
 
 This section outlines how to contribute code to the project.
 
+### 🎯 Choose Your Git Workflow: Command Line vs GUI
+
+While this guide shows Git commands for precision and learning, **you can use GUI tools for all Git operations**. Many find visual tools easier and less error-prone, such as **VSCode's Built-in Source Control Panel**.
+
+**Throughout this guide, look for 💡 GUI Alternative tips** that show how to perform the same operations using VSCode or other visual tools. The command-line examples are provided for reference and learning, but you're encouraged to use whichever method feels more comfortable and reduces the chance of mistakes.
+
 ### Understanding GitHub Issues
 
 All tasks, features, bugs, and improvements are tracked as GitHub Issues.
@@ -93,7 +113,8 @@ As an intern, you'll often be responsible for identifying and creating issues fo
 2.  **Click the "New issue" button.**
 3.  **Choose the appropriate template** for your issue. We have templates for:
     - **Bug Report**: For reporting unexpected behavior or errors. (Uses `bug.md`)
-    - **Feature Request**: For proposing new features or enhancements. (Uses `feature.md`)
+    - **Feature Request**: For proposing new features or functionality. (Uses `feature.md`)
+    - **Enhancement**: For improvements or optimizations to existing features. (Uses `enhancement.md`)
     - **Documentation**: For tasks related to creating or updating documentation. (Uses `docs.md`)
     - **Chore**: For routine maintenance tasks, refactoring, or other non-feature/bug work. (Uses `chore.md`)
     - **Setup**: For issues related to project setup or environment configuration. (Uses `setup.md`)
@@ -141,14 +162,22 @@ We follow a trunk-based development approach with a focus on clear and descripti
 ### Making Changes
 
 1.  **Pull the latest changes**: Before starting work, ensure your `develop` branch is up-to-date:
+
     ```bash
     git checkout develop
     git pull origin develop
     ```
+
+    > **💡 GUI Alternative**: In VSCode, click on the branch name in the bottom-left corner, select `develop`, then click the sync/pull icon (↻) in the status bar or use the Source Control panel.
+
 2.  **Create your feature branch**:
+
     ```bash
     git checkout -b feat/backend-#101-fix-auth-token-expiry develop
     ```
+
+    > **💡 GUI Alternative**: In VSCode, click the branch name in the bottom-left, select "Create new branch from...", choose `develop`, and enter your branch name following our naming convention.
+
 3.  **Write your code!**
 4.  **Using `uv` for Package Management**:
     - To add a new package: `uv add <package-name>`
@@ -192,24 +221,38 @@ A commit message should be structured as follows:
 To maintain a clean and linear project history, we prefer rebasing your feature branch onto `develop` rather than merging `develop` into your branch.
 
 1.  **Fetch the latest changes from `develop`**:
+
     ```bash
     git fetch origin develop
     ```
+
+    > **💡 GUI Alternative**: In VS Code, use the Source Control panel and click the refresh icon, or use the sync button in the status bar.
+
 2.  **Rebase your feature branch**:
+
     ```bash
     git checkout your-feature-branch
     git rebase origin/develop
     ```
+
+    > **💡 GUI Alternative**: In VS Code, ensure you're on your feature branch, then open the Command Palette (Ctrl/Cmd+Shift+P), type "Git: Rebase Branch" and select `origin/develop` as the target.
+
 3.  **Resolve conflicts**: If there are merge conflicts, Git will pause the rebase and ask you to resolve them. After resolving conflicts, continue the rebase:
+
     ```bash
     git add . # Add resolved files
     git rebase --continue
     ```
+
+    > **💡 GUI Alternative**: VS Code will show conflict markers in your files. Resolve conflicts using the inline conflict resolution tools, then use the Source Control panel to stage changes and continue the rebase.
+
 4.  **Force push (with lease)**: After a successful rebase, you'll need to force push your branch. Use `git push --force-with-lease` to avoid accidentally overwriting work if someone else has pushed to the branch.
 
     ```bash
-    git push origin your-feature-branch --force-with-lease
+    git push origin your-feature-branch --force-with-lease --force-if-includes
     ```
+
+    > **💡 GUI Alternative**: In VS Code, after rebasing, the Source Control panel will show that your branch has diverged. Click the sync button and choose "Force Push" when prompted.
 
     _Why rebase?_ Rebasing helps keep the commit history clean by placing your feature branch commits on top of the latest `develop` branch, avoiding unnecessary merge commits.
 
@@ -237,16 +280,96 @@ Once your changes are ready and you've pushed them to your feature branch on Git
 
 ### Example Workflow Summary
 
-1.  Intern picks up issue `#101` (e.g., a backend bug).
-2.  Ensures `develop` is up to date: `git checkout develop && git pull origin develop`.
-3.  Creates a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
-4.  Makes changes, commits them using Conventional Commits.
-5.  (If `develop` has new commits) Rebases branch: `git rebase origin/develop`.
-6.  Pushes branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
-7.  Opens a PR against `develop`.
-8.  Adds `backend` label, links issue with `Closes #101` in the PR description.
-9.  After review and approval, the PR is merged by your supervisor.
+1.  Pick up issue `#101` (e.g., a backend bug).
+2.  Ensure `develop` is up to date: `git checkout develop && git pull origin develop`.
+    > **💡 GUI Alternative**: Click branch name → select `develop` → click sync icon
+3.  Create a branch: `git checkout -b fix/backend-#101-fix-auth-token-expiry develop`.
+    > **💡 GUI Alternative**: Click branch name → "Create new branch from..." → choose `develop`
+4.  Make changes, commit them using Conventional Commits.
+    > **💡 GUI Alternative**: Use Source Control panel to stage changes and write commit messages. Use "Conventional Commits" extension to help write commits.
+5.  (If `develop` has new commits) Rebase branch: `git rebase origin/develop`.
+    > **💡 GUI Alternative**: Command Palette → "Git: Rebase Branch" → select `origin/develop`
+6.  Push branch: `git push origin fix/backend-#101-fix-auth-token-expiry --force-with-lease`.
+    > **💡 GUI Alternative**: Use sync button and choose "Force Push" when prompted
+7.  Open a PR against `develop`.
+8.  Add `backend` label, link issue with `Closes #101` in the PR description.
+9.  After review and approval, the PR is merged by a maintainer.
 10. The issue `#101` is automatically closed.
+11. Delete the feature branch locally and remotely to keep the repository clean:
+
+    ```bash
+    git checkout develop
+    git branch -d fix/backend-#101-fix-auth-token-expiry  # Delete local branch
+    git push origin --delete fix/backend-#101-fix-auth-token-expiry  # Delete remote branch
+    ```
+
+    > **💡 GUI Alternative**: In VSCode, switch to `develop` branch, then open the Command Palette (Ctrl/Cmd+Shift+P), type "Git: Delete Branch" and select the branch you want to delete locally. On the remote repo, GitHub will prompt to delete the remote branch after the PR is merged.
+
+### Recommended Workflow for Full-Stack Features
+
+When working on features that involve both backend and frontend changes, follow this sequence to ensure smooth development:
+
+**Why Backend First?**
+Since our frontend depends on the backend APIs, it's essential to have the backend functionality working before implementing the UI. This approach ensures that:
+
+- Frontend developers have working APIs to integrate with
+- Functionality is prioritized over appearance (which is the right approach)
+- Integration issues are caught early
+- Testing can be done incrementally
+
+**Step-by-Step Process:**
+
+1. **Backend Development:**
+
+   ```bash
+   # Create backend branch
+   git checkout -b feat/backend-#123-user-authentication develop
+
+   # Implement backend functionality
+   # - Add API endpoints
+   # - Implement business logic
+   # - Add tests
+   # - Update documentation
+
+   # Submit backend PR
+   git push origin feat/backend-#123-user-authentication
+   # Open PR against develop, get it reviewed and merged
+   ```
+
+   > **💡 GUI Alternative**: Use VSCode's branch creation and Source Control panel for all Git operations above.
+
+2. **Frontend Development (after backend is merged):**
+
+   ```bash
+   # Update your develop branch
+   git checkout develop
+   git pull origin develop
+
+   # Create frontend branch
+   git checkout -b feat/frontend-#123-user-authentication develop
+
+   # Implement frontend functionality
+   # - Create UI components
+   # - Integrate with backend APIs
+   # - Add user interactions
+   # - Test the complete flow
+
+   # Submit frontend PR
+   git push origin feat/frontend-#123-user-authentication
+   # Open PR against develop
+   ```
+
+   > **💡 GUI Alternative**: Switch to `develop` → sync → create new branch → implement → use Source Control panel to commit and push.
+
+**Important Notes:**
+
+- Use separate branches for backend and frontend work, even if they're for the same feature
+- Both PRs should reference the same issue number (e.g., `#123`)
+- Only the final frontend PR should include `Closes #123` to auto-close the issue
+- The backend PR can use `Refs #123` to link without closing
+- Test the complete end-to-end functionality before marking the feature as complete
+
+This workflow ensures that each component is properly reviewed and tested before moving to the next layer of the application.
 
 ## 🎨 Coding Standards
 
@@ -266,7 +389,7 @@ To give you a clearer picture, here's a typical file structure you'll encounter 
 
 ```
 backend/
-├── main.py             # FastAPI app entry point, global configurations, includes module routers. Connects all the pieces.
+├── main.py             # FastAPI app entry point with global configurations that includes module routers and connects all the pieces.
 ├── config.py           # Application-wide settings (e.g., environment variables, external service URLs).
 ├── database.py         # Database connection setup, session management, and potentially base ORM configurations.
 │
@@ -276,10 +399,10 @@ backend/
 │ ├── __init__.py       # Standard Python package marker.
 │ ├── router.py         # Defines API endpoints (FastAPI routers) for this module. Handles HTTP requests and responses.
 │ ├── service.py        # Contains the core business logic for the module. Orchestrates operations, calling repositories and other services.
-│ ├── repository.py     # Handles data access and persistence. Interacts directly with the database.
 │ ├── schemas.py        # Pydantic models used for API request/response validation, serialization, and as Data Transfer Objects (DTOs) between layers.
-│ ├── models.py         # (If using an ORM or distinct domain models) Defines the structure of your data, often corresponding to database tables or rich domain objects.
 │ ├── exceptions.py     # Custom exception classes specific to this module, helping to handle errors gracefully.
+│ ├── utils.py          # Helper functions and utilities specific to this module. Contains reusable code that doesn't fit elsewhere.
+│ └── constants.py      # Module-specific constants, enums, and configuration values that don't change during runtime.
 ```
 
 This structure promotes separation of concerns and makes it easier to navigate and maintain the codebase as it grows. When creating new features or modules, try to follow this pattern.
